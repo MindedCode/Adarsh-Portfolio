@@ -339,7 +339,11 @@
             color: white;
             font-size: 23px;
             box-shadow: 0 0 10px #00f7ff, 0 0 12px #00f7ff;
-            ">
+            transition: all 0.3s ease;"
+                   /* Hover Effect */
+            onmouseover="this.style.transform='scale(1.2)'; this.style.boxShadow='0 0 20px #ff00ff, 0 0 40px #ff00ff';"
+            onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 0 10px #00f7ff, 0 0 20px #00f7ff';"
+            >
             <i class="fa-brands fa-x-twitter"></i>
             </a>
             <a href="https://github.com/MindedCode" class="fa fa-github"></a>
