@@ -776,8 +776,8 @@
     }
 
     .mobile-nav .btn-primary {
-        background: var(--dark);
-        color: var(--pure);
+        background: var(--primary);
+        color: var(--dark);
     }
 
     .mobile-nav .btn-primary:hover {
@@ -806,5 +806,32 @@
 
         .hero {
             padding: 10rem 0 5rem 0;
+        }
+    }
+/* 
+    @media (min-width:1024px) {
+        .tablet-logo {
+            display: none;
+
+        }
+    } */
+/* 
+    @media (max-width: 1440px) {
+        .tablet-logo {
+            display: none;
+        }
+    } */
+
+    @media (min-width: 1200px) and (max-width: 1440px) {
+        .tablet-logo {
+            display: none;
+        }
+
+        .mobile-nav{
+            display: none;
+        }
+
+        .hamberger{
+            display: none;
         }
     }
