@@ -900,8 +900,8 @@
             grid-template-columns: repeat(2, 1fr);
         }
 
-        marquee {
-            scrollamount: 15;
+        .shake-text{
+            animation: side-to-side 0.90s linear infinite alternate;
         }
     }
 
