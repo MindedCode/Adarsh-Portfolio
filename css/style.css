@@ -622,6 +622,64 @@
     }
 
 
+
+    /* for full size */
+
+
+
+    /* for shake */
+
+
+
+
+    /* for final code..  */
+
+    /* 1. कंटेनर जो पूरी स्क्रीन की चौड़ाई (15 inch display) लेगा */
+    .portfolio-banner {
+        width: 100%;
+        /* overflow: hidden; */
+        /* टेक्स्ट को स्क्रीन से बाहर जाने से रोकने के लिए */
+        background: transparent;
+        /* padding: 15px 0; */
+        margin: 0;
+    }
+
+    /* 2. टेक्स्ट की सेटिंग (shake-text) */
+    .shake-text {
+        display: table;
+        /* यह जरूरी है ताकि चौड़ाई बिल्कुल सटीक (Exact) रहे */
+        white-space: nowrap;
+        margin: 0;
+        /* font-size: 2.5rem; */
+        /* आप अपनी पसंद से बदल सकते हैं */
+
+        /* '3s' 15 इंच की स्क्रीन पर 18 scrollamount जैसी तेज़ गति देगा */
+        /* 'alternate' इसे टकराकर वापस लाएगा */
+        animation: side-to-side 4s linear infinite alternate;
+    }
+
+    /* 3. एनीमेशन का लॉजिक: 0 से लेकर स्क्रीन के ठीक किनारे तक */
+    @keyframes side-to-side {
+        0% {
+            transform: translateX(0);
+        }
+
+        100% {
+            /* 100% के बाद - 20px जोड़ें */
+            transform: translateX(calc(100vw - 100% - 37px));
+        }
+    }
+
+    /* 4. टैबलेट स्क्रीन के लिए स्पीड को LOW (धीरे) करना */
+    @media (max-width: 1024px) {
+        .shake-text {
+            /* समय 3s से बढ़ाकर 8s कर दिया, अब यह धीरे चलेगा */
+            animation-duration: 8s;
+            font-size: 1.8rem;
+            /* टैबलेट के लिए थोड़ा छोटा साइज */
+        }
+    }
+
     /* blink {
         animation: blinker 0.6s linear infinite;
         color: var(--primary);
@@ -792,6 +850,10 @@
     }
 
     @media (max-width:1024px) {
+        header {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 62% 90%, 0% 100%);
+        }
+
         header #main-nav {
             display: none;
         }
@@ -807,7 +869,8 @@
             left: 50%;
             right: 2%;
             z-index: 1;
-            margin-top: -1rem;
+            top: 9%;
+            text-align: end;
         }
 
         .hero .right h1 {
@@ -815,13 +878,30 @@
             text-align: end;
         }
 
-        .hero .right h6{
+        .hero .right h6 {
             /* margin-left: 10px; */
-            text-align: center;
+            text-align: end;
         }
 
         .hero {
             padding: 10rem 0 4rem 0;
+        }
+
+        section.about p {
+            text-align: justify;
+            padding-right: 1%;
+        }
+
+        section.skills .card-wrapper {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        section.work .card-wrapper {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        marquee {
+            scrollamount: 15;
         }
     }
 
