@@ -609,9 +609,6 @@
         -o-transition: all .3s ease;
     }
 
-
-
-
     footer .copyright {
         margin-top: 3rem;
         color: var(--ternary);
@@ -620,17 +617,6 @@
     footer .span {
         color: var(--ternary)
     }
-
-
-
-    /* for full size */
-
-
-
-    /* for shake */
-
-
-
 
     /* for final code..  */
 
@@ -669,21 +655,6 @@
             transform: translateX(calc(100vw - 100% - 37px));
         }
     }
-
-    /* 4. टैबलेट स्क्रीन के लिए स्पीड को LOW (धीरे) करना */
-    @media (max-width: 1024px) {
-        .shake-text {
-            /* समय 3s से बढ़ाकर 8s कर दिया, अब यह धीरे चलेगा */
-            animation-duration: 8s;
-            font-size: 1.8rem;
-            /* टैबलेट के लिए थोड़ा छोटा साइज */
-        }
-    }
-
-    /* blink {
-        animation: blinker 0.6s linear infinite;
-        color: var(--primary);
-    } */
 
     blink {
         animation: blinker 1s linear infinite;
@@ -844,12 +815,9 @@
         color: var(--primary);
     }
 
-    body {
-        /* border: 4px solid red; */
+    @media (max-width:768px) {
 
-    }
-
-    @media (max-width:1024px) {
+        /* @media screen and (max-width: 1024px) { */
         header {
             clip-path: polygon(0 0, 100% 0, 100% 100%, 62% 90%, 0% 100%);
         }
@@ -900,24 +868,10 @@
             grid-template-columns: repeat(2, 1fr);
         }
 
-        .shake-text{
+        .shake-text {
             animation: side-to-side 0.90s linear infinite alternate;
         }
     }
-
-    /* 
-    @media (min-width:1024px) {
-        .tablet-logo {
-            display: none;
-
-        }
-    } */
-    /* 
-    @media (max-width: 1440px) {
-        .tablet-logo {
-            display: none;
-        }
-    } */
 
     @media (min-width: 1200px) and (max-width: 1440px) {
         .tablet-logo {
@@ -932,3 +886,102 @@
             display: none;
         }
     }
+
+    /* for mobile*/
+
+    @media (max-width: 576px) {
+
+        body,
+        html {
+            overflow-x: hidden;
+            /* स्क्रीन से बाहर निकलने वाले कंटेंट को छुपाने के लिए */
+            width: 100%;
+        }
+
+        .hamberger {
+            right: 20px
+        }
+
+        .tablet-logo img {
+            position: absolute;
+            z-index: 1;
+            top: 12px;
+            left: -2rem;
+            width: 155px;
+        }
+
+        .container {
+            /* width: 100%; */
+            /* max-width: 1200px; */
+            /* अपनी ज़रूरत के हिसाब से बदलें */
+            flex-direction: column;
+        }
+
+        header {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 66% 92%, 0% 100%);
+        }
+
+        .hero {
+            padding: 10rem 0 4rem 11rem;
+            /* padding: 2rem 0;  */
+            /* 10rem बहुत ज़्यादा है मोबाइल के लिए */
+            /* display: none; */
+        }
+
+        .hero .left img {
+            width: 300px;
+            margin-left: -250px;
+            margin-bottom: 5.6rem;
+            border-radius: 50px;
+            opacity: 0.9;
+        }
+
+        /* @media screen and (max-width: 480px){ */
+
+        .hero .right {
+            right: 2%;
+            top: 7%;
+            left: 2%;
+
+        }
+
+        .right.flex-1 {
+            /* flex-shrink: 0; */
+        }
+
+        .hero .right h6 {
+            font-size: 16px;
+        }
+
+        .hero .right h1 {
+            font-size: 30px;
+            right: 1%;
+
+        }
+
+        .hero .right h1 span {
+            font-size: 28px
+        }
+
+        .hero .right p {
+            line-height: 1.5rem;
+            font-size: 1rem;
+            opacity: 0.8;
+
+        }
+
+        section #about .container {
+            
+        }
+
+        section.skills .card-wrapper {
+            grid-template-columns: repeat(1, 1fr);
+        }
+
+        section.work .card-wrapper {
+            grid-template-columns: repeat(1, 1fr);
+        }
+
+    }
+
+    @media (max-width: 768px) {}
