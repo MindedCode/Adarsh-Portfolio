@@ -910,6 +910,29 @@
             width: 155px;
         }
 
+        .mobile-nav .branding{
+            font-size: 19px;
+            top: 30px;
+    left: 20px;
+        }
+        .times img{
+            width:25px
+        }
+        .times{
+            right: 30px
+        }
+        .mobile-nav ul li a{
+            font-size: 25px;
+        }
+
+        .mobile-nav .right{
+            top: 45%;
+        }
+
+        .btn{
+            font-size: 18px;
+        }
+
         .container {
             /* width: 100%; */
             /* max-width: 1200px; */
@@ -918,11 +941,11 @@
         }
 
         header {
-            clip-path: polygon(0 0, 100% 0, 100% 100%, 66% 92%, 0% 100%);
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 74% 94%, 0% 100%);
         }
 
         .hero {
-            padding: 10rem 0 4rem 11rem;
+            /* padding: 10rem 0 4rem 11rem; */
             /* padding: 2rem 0;  */
             /* 10rem बहुत ज़्यादा है मोबाइल के लिए */
             /* display: none; */
@@ -930,18 +953,19 @@
 
         .hero .left img {
             width: 300px;
-            margin-left: -250px;
-            margin-bottom: 5.6rem;
-            border-radius: 50px;
-            opacity: 0.9;
+            margin-left: -65px;
+            margin-bottom: 7.6rem;
+            border-radius: 40px;
+            /* opacity: 0.9; */
         }
 
         /* @media screen and (max-width: 480px){ */
 
         .hero .right {
             right: 2%;
-            top: 7%;
+            top: 6.7%;
             left: 2%;
+            background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.9));
 
         }
 
@@ -950,11 +974,11 @@
         }
 
         .hero .right h6 {
-            font-size: 16px;
+            font-size: 19px;
         }
 
         .hero .right h1 {
-            font-size: 30px;
+            font-size: 32px;
             right: 1%;
 
         }
@@ -964,18 +988,43 @@
         }
 
         .hero .right p {
-            line-height: 1.5rem;
+            line-height: 2rem;
             font-size: 1rem;
-            opacity: 0.8;
+            /* opacity: 0.8; */
 
         }
 
-        section #about .container {
-            
+        section.about .about-me-img{
+            margin-bottom: 2rem;
         }
 
         section.skills .card-wrapper {
             grid-template-columns: repeat(1, 1fr);
+        }
+
+        section.skills .card-img{
+            margin-left: -5%;
+        }
+
+        section.about h1{
+            text-align: center;
+        }
+        section.about h3{
+            text-align: center;
+        }
+        section.about .social{
+            justify-self: center;
+        }
+
+        section.freelancer{
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 66% 89%, 0% 100%);
+            padding-bottom: 8rem;
+        }
+        section.freelancer p{
+            line-height: 2rem;
+        }
+        .reviews .slide{
+            
         }
 
         section.work .card-wrapper {
