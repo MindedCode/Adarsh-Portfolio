@@ -31,7 +31,6 @@
     header {
         background: var(--dark);
         clip-path: polygon(0 0, 100% 0, 100% 100%, 70% 87%, 0% 100%);
-        /* height: 750px; */
     }
 
     .container {
@@ -113,7 +112,6 @@
 
     .hero .left img {
         width: 425px;
-        /* height: 550px */
         margin-top: -2rem;
         margin-bottom: -1.6rem;
     }
@@ -146,8 +144,8 @@
         margin-bottom: 2rem;
     }
 
-    section {
-        padding: 4rem 0;
+    section{
+        padding: 12rem 0;
     }
 
     section.about .about-me-img {
@@ -239,6 +237,7 @@
 
     section.skills {
         background: var(--light);
+        padding: 3rem 0;
     }
 
     section.skills .card img {
@@ -261,10 +260,10 @@
 
     section.skills .card-wrapper .card {
         background: var(--pure);
-        padding: 3rem 2rem;
+        padding: 3rem 0.5rem;
         margin: 1.5rem;
         position: relative;
-        padding-top: 5rem;
+        padding-top: 3rem;
         text-align: center;
         transition: all .3s ease;
     }
@@ -274,7 +273,7 @@
         grid-template-columns: repeat(3, 1fr);
         /* grid-template-columns: 1fr 1fr 1fr; */
         grid-column-gap: 1rem;
-        grid-row-gap: 2rem;
+        grid-row-gap: 1rem;
     }
 
     section.skills .card h2 {
@@ -308,7 +307,7 @@
     }
 
     section.freelancer h1 {
-        font: 2rem;
+        font-size: 2rem;
         margin-bottom: 2rem;
     }
 
@@ -316,6 +315,14 @@
         margin-bottom: 2rem;
         font-family: 'Lato', sans-serif;
     }
+
+    .reviews {
+        padding: 3rem 0;
+    }
+
+    /* section {
+        padding: 3rem 0;
+    } */
 
     .certificate-heading span {
         color: var(--primary);
@@ -336,8 +343,8 @@
     }
 
     .reviews .slider .slide img {
-        width: 550px;
-        height: 450px;
+        width: 34.5rem;
+        /* height: 450px; */
         border-radius: 50;
         object-fit: cover;
         border: 1px solid var(--dark);
@@ -351,8 +358,8 @@
     }
 
     .slide-2 {
-        width: 560px;
-        height: 460px;
+        width: 35.1rem;
+        /* height: 460px; */
         background: var(--primary);
         padding-left: 3.5px;
         padding-top: 0.2rem;
@@ -699,6 +706,8 @@
         background: none;
         border: none;
         cursor: pointer;
+        /* display: hidden; */
+        display: none;
 
     }
 
@@ -795,6 +804,7 @@
         z-index: 1;
         top: 20px;
         left: 3rem;
+        display: none;
     }
 
     .mobile-nav .right {
@@ -815,9 +825,20 @@
         color: var(--primary);
     }
 
-    @media (max-width:768px) {
+    /* @media (max-width:768px) { */
+    .tablet-logo {
+        display: none;
+    }
 
-        /* @media screen and (max-width: 1024px) { */
+    @media (min-width: 600px) and (max-width: 1200px) {
+
+        /* @media screen and (max-width: 1088px) { */
+        .hamberger,
+        .tablet-logo {
+            display: block;
+            /* right: 2px; */
+        }
+
         header {
             clip-path: polygon(0 0, 100% 0, 100% 100%, 62% 90%, 0% 100%);
         }
@@ -829,13 +850,15 @@
         .hero .left img {
             width: 550px;
             margin-bottom: -4.6rem;
-            margin-left: -267px;
+            margin-left: -391px;
+            overflow: hidden;
         }
+
 
         .hero .right {
             position: absolute;
-            left: 50%;
-            right: 2%;
+            left: 48%;
+            right: 4%;
             z-index: 1;
             top: 9%;
             text-align: end;
@@ -874,9 +897,9 @@
     }
 
     @media (min-width: 1200px) and (max-width: 1440px) {
-        .tablet-logo {
+        /* .tablet-logo {
             display: none;
-        }
+        } */
 
         .mobile-nav {
             display: none;
@@ -888,8 +911,8 @@
     }
 
     /* for mobile*/
-
-    @media (max-width: 576px) {
+    @media (min-width: 300px) and (max-width: 576px) {
+        /* @media (max-width: 576px) { */
 
         body,
         html {
@@ -899,8 +922,13 @@
         }
 
         .hamberger {
-            right: 20px
+            right: 20px;
         }
+
+        .tablet-logo {
+            display: block;
+        }
+
 
         .tablet-logo img {
             position: absolute;
@@ -1049,11 +1077,11 @@
         }
 
 
-        section.contact .card-wrapper{
+        section.contact .card-wrapper {
             grid-template-columns: repeat(1, 1fr);
         }
 
-        section.contact .input-wrap{
+        section.contact .input-wrap {
             grid-template-columns: repeat(1, 1fr);
         }
     }
