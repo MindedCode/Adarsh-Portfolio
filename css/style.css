@@ -144,7 +144,7 @@
         margin-bottom: 2rem;
     }
 
-    section{
+    section {
         padding: 12rem 0;
     }
 
@@ -320,10 +320,6 @@
         padding: 3rem 0;
     }
 
-    /* section {
-        padding: 3rem 0;
-    } */
-
     .certificate-heading span {
         color: var(--primary);
     }
@@ -414,6 +410,7 @@
 
     section.work {
         background: var(--light);
+        padding: 3rem 0;
     }
 
     section.work .card-wrapper {
@@ -825,11 +822,11 @@
         color: var(--primary);
     }
 
-    /* @media (max-width:768px) { */
     .tablet-logo {
         display: none;
     }
 
+    /* @media (max-width:768px) { */
     @media (min-width: 600px) and (max-width: 1200px) {
 
         /* @media screen and (max-width: 1088px) { */
@@ -848,10 +845,24 @@
         }
 
         .hero .left img {
-            width: 550px;
-            margin-bottom: -4.6rem;
-            margin-left: -391px;
-            overflow: hidden;
+            /* width: 550px; */
+            /* max-width: 100%; */
+            /* margin-bottom: -4.6rem; */
+            /* margin-left: -391px; */
+            /* overflow: hidden; */
+        }
+
+        .hero .left img {
+            width: 425px;
+            /* Desktop पर आपकी पसंद का साइज */
+            max-width: 100%;
+            /* मोबाइल/टैब पर इमेज को कटने से रोकेगा */
+            height: auto;
+            /* Aspect ratio को बिगड़ने नहीं देगा */
+            margin-left: 0;
+            /* हमेशा लेफ्ट से सटा रहेगा */
+            display: block;
+            /* एलाइनमेंट सही रखने के लिए */
         }
 
 
@@ -911,7 +922,7 @@
     }
 
     /* for mobile*/
-    @media (min-width: 300px) and (max-width: 576px) {
+    @media (min-width: 300px) and (max-width: 600px) {
         /* @media (max-width: 576px) { */
 
         body,
