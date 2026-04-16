@@ -360,6 +360,7 @@ section.freelancer p {
     background: var(--primary);
     padding-left: 3.5px;
     padding-top: 0.2rem;
+    padding-bottom:3px;
     border-radius: 5px;
     box-shadow: 10px 10px var(--ternary);
     border: 2px solid var(--dark);
