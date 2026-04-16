@@ -358,9 +358,10 @@ section.freelancer p {
     width: 35.1rem;
     /* height: 460px; */
     background: var(--primary);
-    padding-left: 3.5px;
+    /* padding-left: 3.5px;
     padding-top: 0.2rem;
-    padding-bottom:3px;
+    padding-bottom: 3px; */
+    padding: 0.2rem 0 3px 3.5px;
     border-radius: 5px;
     box-shadow: 10px 10px var(--ternary);
     border: 2px solid var(--dark);
