@@ -1215,7 +1215,6 @@ blink {
     section.skills .card-img {
         transform: translateX(-32%);
     }
-<<<<<<< HEAD
     .hero .right{
         top: 4.8%
     }
@@ -1224,39 +1223,3 @@ blink {
         font-size: 0.8rem;
     }
 }
-=======
-
-    @media screen and (max-width:360px) {
-        header {
-            clip-path: polygon(0 0, 100% 0, 100% 100%, 68% 94%, 0% 100%);
-        }
-
-        .tablet-logo img {
-            top: -22px;
-            left: -3rem;
-            width: 200px;
-        }
-
-        .hamberger {
-            top: 18px;
-            right: 18px;
-        }
-        .hero .left {
-            padding-bottom: 10px;
-
-        .hero .left img {
-            padding-top: 10px
-        }
-
-        .hero .right {
-            .hero .right {
-                top: 6.7%;
-            }
-        }
-
-        .shake-text {
-            animation: side-to-side 0.30s linear infinite alternate;
-            font-size: 0.8rem;
-        }
-    }
->>>>>>> advance-branch
