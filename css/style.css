@@ -1201,7 +1201,7 @@ blink {
 
 @media (max-width: 412px) {
     header {
-        clip-path: polygon(0 0, 100% 0, 100% 100%, 74% 93%, 0% 100%);
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 74% 95%, 0% 100%);
     }
 
     .hero .right {
@@ -1214,9 +1214,6 @@ blink {
 
     section.skills .card-img {
         transform: translateX(-32%);
-    }
-    .hero .right{
-        top: 4.8%
     }
     .shake-text {
         animation: side-to-side 0.30s linear infinite alternate;
