@@ -1,5 +1,6 @@
 /* @import url(utilities.css); */
 @import 'utilities.css';
+@import url(advance.css);
 @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap');
 
 /* create var root */
@@ -360,8 +361,12 @@ section.freelancer p {
     background: var(--primary);
     /* padding-left: 3.5px;
     padding-top: 0.2rem;
+<<<<<<< HEAD
     padding-bottom: 3px; */
     padding: 0.2rem 0 3px 3.5px;
+=======
+    padding-bottom: 3px;
+>>>>>>> advance-branch
     border-radius: 5px;
     box-shadow: 10px 10px var(--ternary);
     border: 2px solid var(--dark);
@@ -842,7 +847,8 @@ blink {
     .tablet-logo {
         display: block;
     }
-    .btn{
+
+    .btn {
         font-weight: 800;
     }
 
@@ -926,6 +932,7 @@ blink {
         top: 48px;
         right: 65px;
     }
+
     .container {
         max-width: 765px
     }
@@ -1171,6 +1178,14 @@ blink {
 }
 
 @media screen and (max-width: 576px) {
+    .header {
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 74% 93%, 0% 100%);
+    }
+
+    .hero .right {
+        top: 6.7%;
+    }
+
     .shake-text {
         animation: side-to-side 0.7s linear infinite alternate;
         font-size: 2rem;
@@ -1184,22 +1199,23 @@ blink {
     }
 }
 
-@media screen and (max-width:360px) {
-    header{
-        clip-path: polygon(0 0, 100% 0, 100% 100%, 68% 94%, 0% 100%);
+@media (max-width: 412px) {
+    header {
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 74% 93%, 0% 100%);
     }
-    .tablet-logo img{
-        top: -22px;
-        left: -3rem;
-        width: 200px;
+
+    .hero .right {
+        top: 6.7%;
     }
-    .hamberger{
-        top: 18px;
-        right: 18px;
+
+    .hero .right h1 {
+        font-size: 3.1rem;
     }
-    .hero .left img{
-        padding-top: 10px
+
+    section.skills .card-img {
+        transform: translateX(-32%);
     }
+<<<<<<< HEAD
     .hero .right{
         top: 4.8%
     }
@@ -1208,3 +1224,39 @@ blink {
         font-size: 0.8rem;
     }
 }
+=======
+
+    @media screen and (max-width:360px) {
+        header {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 68% 94%, 0% 100%);
+        }
+
+        .tablet-logo img {
+            top: -22px;
+            left: -3rem;
+            width: 200px;
+        }
+
+        .hamberger {
+            top: 18px;
+            right: 18px;
+        }
+        .hero .left {
+            padding-bottom: 10px;
+
+        .hero .left img {
+            padding-top: 10px
+        }
+
+        .hero .right {
+            .hero .right {
+                top: 6.7%;
+            }
+        }
+
+        .shake-text {
+            animation: side-to-side 0.30s linear infinite alternate;
+            font-size: 0.8rem;
+        }
+    }
+>>>>>>> advance-branch
