@@ -1202,7 +1202,7 @@ blink {
 
 @media (max-width: 432px) {
     header {
-        clip-path: polygon(0 0, 100% 0, 100% 100%, 74% 95%, 0% 100%);
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 74% 94%, 0% 100%);
     }
 
     .hero .right {
@@ -1222,7 +1222,7 @@ blink {
     }
 
     .portfolio-banner {
-        padding-left: 15px;
+        padding-left: 10px;
     }
 
     .shake-text {
