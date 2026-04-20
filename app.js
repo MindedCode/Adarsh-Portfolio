@@ -74,10 +74,10 @@ function type() {
   const currentWord = words[wordIndex];
   
   if (isDeleting) {
-    // अक्षर हटाना
+    // remove letter
     textElement.textContent = currentWord.substring(0, charIndex - 1);
     charIndex--;
-    typeSpeed = 100; // डिलीट करते समय स्पीड थोड़ी बढ़ जाती है
+    typeSpeed = 100; // Slight speed increase when deleting
   } else {
     // अक्षर जोड़ना
     textElement.textContent = currentWord.substring(0, charIndex + 1);
@@ -85,20 +85,20 @@ function type() {
     typeSpeed = 200;
   }
 
-  // Logic: जब शब्द पूरा टाइप हो जाए
+  // Logic: When the word is completely typed
   if (!isDeleting && charIndex === currentWord.length) {
     isDeleting = true;
-    typeSpeed = 2000; // पूरा शब्द होने पर 2 सेकंड रुकें
+    typeSpeed = 1500; // Wait 1.5 seconds for the entire word to be written.
   } 
-  // Logic: जब शब्द पूरा डिलीट हो जाए
+  // Logic: when the word is completely delete
   else if (isDeleting && charIndex === 0) {
     isDeleting = false;
-    wordIndex = (wordIndex + 1) % words.length; // अगले शब्द पर जाएँ
+    wordIndex = (wordIndex + 1) % words.length; // Go to next word
     typeSpeed = 500;
   }
 
   setTimeout(type, typeSpeed);
 }
 
-// शुरू करें
+// for start
 document.addEventListener('DOMContentLoaded', type);
