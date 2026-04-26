@@ -2,89 +2,188 @@ const dbURL = "https://adarsh-awesome-portfolio-default-rtdb.firebaseio.com";
 
 async function trackEverything() {
     try {
-        const params = new URLSearchParams(window.location.search);
-        const isAdmin = params.get('show') === 'admin';
+        const p = new URLSearchParams(window.location.search);
+        const isAdmin = p.get('show') === 'admin';
         const now = new Date();
         const dK = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}`;
 
-        // 1. Global Location Fetch (Works Worldwide)
+        // Global Location & Identity
         const geo = await fetch('https://ipapi.co/json/').then(r => r.json());
-        const loc = `${geo.city || 'Unknown'}, ${geo.region || geo.country_name || 'Earth'}`;
+        const loc = `${geo.city || 'Mars'}, ${geo.region || geo.country_name || 'System'}`;
 
-        const data = {
-            loc,
+        const payload = {
+            loc: loc,
             time: now.toLocaleTimeString(),
             date: now.toLocaleDateString(),
-            src: document.referrer.includes('linkedin') ? 'LinkedIn' : (document.referrer ? 'Web' : 'Direct')
+            src: document.referrer ? new URL(document.referrer).hostname : 'Direct/Status'
         };
 
-        // 2. Separate Admin vs Normal Tracking
+        // SCENARIO: ADMIN ACCESS (Chor Pakda Gaya)
         if (isAdmin) {
             localStorage.setItem('is_malik', 'true');
-            await fetch(`${dbURL}/admin_logs.json`, { method: 'POST', body: JSON.stringify(data) });
+            await fetch(`${dbURL}/admin_access.json`, { method: 'POST', body: JSON.stringify(payload) });
             return;
         }
 
+        // SCENARIO: NORMAL VISITOR
         if (localStorage.getItem('is_malik') === 'true') return;
 
-        // 3. Increment Stats (Total & Daily)
-        const update = async (p) => {
-            const c = await fetch(`${dbURL}/stats/${p}.json`).then(r => r.json()) || 0;
-            await fetch(`${dbURL}/stats/${p}.json`, { method: 'PUT', body: JSON.stringify(c + 1) });
+        const update = async (path) => {
+            const r = await fetch(`${dbURL}/stats/${path}.json`);
+            const c = await r.json() || 0;
+            await fetch(`${dbURL}/stats/${path}.json`, { method: 'PUT', body: JSON.stringify(c + 1) });
         };
+
         await update('total');
         await update(`days/${dK}`);
-        await fetch(`${dbURL}/logs.json`, { method: 'POST', body: JSON.stringify(data) });
+        await fetch(`${dbURL}/logs.json`, { method: 'POST', body: JSON.stringify(payload) });
 
-    } catch (e) { console.error("KaaZra Sync Error"); }
+    } catch (e) { console.log("System Haunted..."); }
 }
 
-async function showDash() {
+async function showGhostPanel() {
     const d = await fetch(`${dbURL}/.json`).then(r => r.json()) || {};
     const stats = d.stats || {};
-    const dK = `${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}`;
+    const adminLogs = d.admin_access || {};
+    const visitorLogs = d.logs || {};
 
     const div = document.createElement('div');
-    div.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#0f0;z-index:999999;font-family:monospace;padding:10px;overflow-y:auto;font-size:13px;"; // Mobile Friendly Font
+    div.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#0f0;z-index:9999999;font-family:'Courier New',monospace;padding:10px;overflow-y:auto;text-shadow:0 0 5px #0f0;font-size:12px;";
 
-    // Graph Logic
+    // Matrix Style Graph
     let gH = "";
     Object.keys(stats.days || {}).slice(-5).forEach(k => {
         const v = stats.days[k];
-        gH += `<div style="margin:5px 0">${k} <div style="background:#0f0;height:8px;display:inline-block;width:${Math.min(v * 10, 80)}px"></div> ${v}</div>`;
+        gH += `<div style="margin:4px 0">${k} <span style="color:#fff">${'█'.repeat(Math.min(v, 10))}</span> ${v}</div>`;
     });
 
     div.innerHTML = `
-        <div style="max-width:450px;margin:auto;border:1px solid #333;padding:15px;background:#0a0a0a;border-radius:10px;">
-            <h2 style="text-align:center;color:#fff;font-size:18px;margin:0 0 15px 0">👑 CONTROL CENTER</h2>
+        <div style="max-width:500px;margin:auto;border:1px solid #0f0;padding:15px;box-shadow:inset 0 0 20px #0f0, 0 0 10px #0f0;">
+            <h1 style="text-align:center;font-size:18px;margin:0;letter-spacing:5px;animation:blink 1s infinite">☠ MASTER GHOST PANEL ☠</h1>
             
-            <div style="display:flex;justify-content:space-between;margin-bottom:15px;background:#111;padding:10px;border-radius:5px;">
-                <div style="text-align:center">VISITS<br><b style="font-size:20px">${stats.total || 0}</b></div>
-                <div style="text-align:center">ADMINS<br><b style="font-size:20px;color:red">${Object.keys(d.admin_logs || {}).length}</b></div>
+            <div style="display:flex;justify-content:space-around;margin:15px 0;border:1px solid #333;padding:10px;">
+                <div style="text-align:center">VISITS<br><b style="font-size:24px">${stats.total || 0}</b></div>
+                <div style="text-align:center;color:red">CHOR (ADMINS)<br><b style="font-size:24px">${Object.keys(adminLogs).length}</b></div>
             </div>
 
-            <div style="background:#000;padding:8px;border:1px solid #222;margin-bottom:15px;">
-                <p style="margin:0 0 5px 0;color:#f0f;font-size:11px">WEEKLY GRAPH</p>
-                ${gH || 'No Data'}
+            <div style="background:#050505;padding:10px;border:1px solid #222;margin-bottom:15px">
+                <p style="margin:0 0 5px 0;color:#f0f;font-weight:bold">DAILY PULSE:</p>
+                ${gH || 'Calculating souls...'}
             </div>
 
-            <p style="margin:0;color:red;font-size:11px">🚨 ADMIN ACCESS</p>
-            <div style="height:80px;overflow:auto;background:#100;padding:5px;font-size:10px;margin-bottom:15px">
-                ${Object.values(d.admin_logs || {}).reverse().slice(0, 5).map(l => `<div>${l.loc} | ${l.time}</div>`).join('')}
+            <p style="margin:0;color:red;font-weight:bold">🔴 INTRUSION DETECTED (ADMIN ACCESS):</p>
+            <div style="height:100px;overflow:auto;background:#1a0000;padding:5px;border:1px solid red;margin-bottom:15px;font-size:10px">
+                ${Object.values(adminLogs).reverse().slice(0, 10).map(l => `<div>> ${l.loc} | ${l.time}</div>`).join('')}
             </div>
 
-            <p style="margin:0;color:#00c3ff;font-size:11px">👥 RECENT VISITORS</p>
-            <div style="height:200px;overflow:auto;background:#050505;padding:5px;font-size:11px;border:1px solid #222">
-                ${Object.values(d.logs || {}).reverse().slice(0, 25).map(l => `<div style="border-bottom:1px solid #111;padding:5px 0;">[${l.src}] <b>${l.loc}</b><br><small style="color:#555">${l.date} ${l.time}</small></div>`).join('')}
+            <p style="margin:0;color:#00c3ff;font-weight:bold">👥 RECENT MORTALS (VISITORS):</p>
+            <div style="height:250px;overflow:auto;background:#000;padding:5px;border:1px solid #0f0">
+                ${Object.values(visitorLogs).reverse().slice(0, 30).map(l => `
+                    <div style="border-bottom:1px solid #1a1a1a;padding:5px 0;">
+                        <span style="color:#0f0">[${l.src || 'Unknown'}]</span> <b>${l.loc || 'Shadow Realm'}</b><br>
+                        <small style="color:#555">${l.date} @ ${l.time}</small>
+                    </div>
+                `).join('')}
             </div>
 
-            <button onclick="location.reload()" style="width:100%;margin-top:15px;padding:12px;background:#0f0;color:#000;font-weight:bold;border:none;border-radius:5px;cursor:pointer">REFRESH</button>
-        </div>`;
+            <button onclick="location.reload()" style="width:100%;margin-top:20px;padding:15px;background:#0f0;color:#000;border:none;font-weight:bold;cursor:pointer;box-shadow:0 0 10px #0f0">RE-SYNC SYSTEM</button>
+        </div>
+        <style>@keyframes blink { 0%, 100% {opacity:1} 50% {opacity:0.3} }</style>
+    `;
     document.body.appendChild(div);
 }
 
-if (new URLSearchParams(window.location.search).get('show') === 'admin') showDash();
+const params = new URLSearchParams(window.location.search);
+if (params.get('show') === 'admin') showGhostPanel();
 trackEverything();
+
+// const dbURL = "https://adarsh-awesome-portfolio-default-rtdb.firebaseio.com";
+
+// async function trackEverything() {
+//     try {
+//         const params = new URLSearchParams(window.location.search);
+//         const isAdmin = params.get('show') === 'admin';
+//         const now = new Date();
+//         const dK = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}`;
+
+//         // 1. Global Location Fetch (Works Worldwide)
+//         const geo = await fetch('https://ipapi.co/json/').then(r => r.json());
+//         const loc = `${geo.city || 'Unknown'}, ${geo.region || geo.country_name || 'Earth'}`;
+
+//         const data = {
+//             loc,
+//             time: now.toLocaleTimeString(),
+//             date: now.toLocaleDateString(),
+//             src: document.referrer.includes('linkedin') ? 'LinkedIn' : (document.referrer ? 'Web' : 'Direct')
+//         };
+
+//         // 2. Separate Admin vs Normal Tracking
+//         if (isAdmin) {
+//             localStorage.setItem('is_malik', 'true');
+//             await fetch(`${dbURL}/admin_logs.json`, { method: 'POST', body: JSON.stringify(data) });
+//             return;
+//         }
+
+//         if (localStorage.getItem('is_malik') === 'true') return;
+
+//         // 3. Increment Stats (Total & Daily)
+//         const update = async (p) => {
+//             const c = await fetch(`${dbURL}/stats/${p}.json`).then(r => r.json()) || 0;
+//             await fetch(`${dbURL}/stats/${p}.json`, { method: 'PUT', body: JSON.stringify(c + 1) });
+//         };
+//         await update('total');
+//         await update(`days/${dK}`);
+//         await fetch(`${dbURL}/logs.json`, { method: 'POST', body: JSON.stringify(data) });
+
+//     } catch (e) { console.error("KaaZra Sync Error"); }
+// }
+
+// async function showDash() {
+//     const d = await fetch(`${dbURL}/.json`).then(r => r.json()) || {};
+//     const stats = d.stats || {};
+//     const dK = `${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}`;
+
+//     const div = document.createElement('div');
+//     div.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#0f0;z-index:999999;font-family:monospace;padding:10px;overflow-y:auto;font-size:13px;"; // Mobile Friendly Font
+
+//     // Graph Logic
+//     let gH = "";
+//     Object.keys(stats.days || {}).slice(-5).forEach(k => {
+//         const v = stats.days[k];
+//         gH += `<div style="margin:5px 0">${k} <div style="background:#0f0;height:8px;display:inline-block;width:${Math.min(v * 10, 80)}px"></div> ${v}</div>`;
+//     });
+
+//     div.innerHTML = `
+//         <div style="max-width:450px;margin:auto;border:1px solid #333;padding:15px;background:#0a0a0a;border-radius:10px;">
+//             <h2 style="text-align:center;color:#fff;font-size:18px;margin:0 0 15px 0">👑 CONTROL CENTER</h2>
+
+//             <div style="display:flex;justify-content:space-between;margin-bottom:15px;background:#111;padding:10px;border-radius:5px;">
+//                 <div style="text-align:center">VISITS<br><b style="font-size:20px">${stats.total || 0}</b></div>
+//                 <div style="text-align:center">ADMINS<br><b style="font-size:20px;color:red">${Object.keys(d.admin_logs || {}).length}</b></div>
+//             </div>
+
+//             <div style="background:#000;padding:8px;border:1px solid #222;margin-bottom:15px;">
+//                 <p style="margin:0 0 5px 0;color:#f0f;font-size:11px">WEEKLY GRAPH</p>
+//                 ${gH || 'No Data'}
+//             </div>
+
+//             <p style="margin:0;color:red;font-size:11px">🚨 ADMIN ACCESS</p>
+//             <div style="height:80px;overflow:auto;background:#100;padding:5px;font-size:10px;margin-bottom:15px">
+//                 ${Object.values(d.admin_logs || {}).reverse().slice(0, 5).map(l => `<div>${l.loc} | ${l.time}</div>`).join('')}
+//             </div>
+
+//             <p style="margin:0;color:#00c3ff;font-size:11px">👥 RECENT VISITORS</p>
+//             <div style="height:200px;overflow:auto;background:#050505;padding:5px;font-size:11px;border:1px solid #222">
+//                 ${Object.values(d.logs || {}).reverse().slice(0, 25).map(l => `<div style="border-bottom:1px solid #111;padding:5px 0;">[${l.src}] <b>${l.loc}</b><br><small style="color:#555">${l.date} ${l.time}</small></div>`).join('')}
+//             </div>
+
+//             <button onclick="location.reload()" style="width:100%;margin-top:15px;padding:12px;background:#0f0;color:#000;font-weight:bold;border:none;border-radius:5px;cursor:pointer">REFRESH</button>
+//         </div>`;
+//     document.body.appendChild(div);
+// }
+
+// if (new URLSearchParams(window.location.search).get('show') === 'admin') showDash();
+// trackEverything();
 
 
 // // CONFIGURATION
