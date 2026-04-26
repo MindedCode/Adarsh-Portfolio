@@ -5,19 +5,19 @@ async function trackEverything() {
         const urlParams = new URLSearchParams(window.location.search);
         const isAdminEntry = urlParams.get('show') === 'admin';
         const now = new Date();
-
+        
         const dK = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}`;
         const mK = `${now.getMonth() + 1}-${now.getFullYear()}`;
         const yK = `${now.getFullYear()}`;
 
-        // Accurate Location Fetch
+        // Accurate Location Fetching
         const geoRes = await fetch('https://ipapi.co/json/');
         const geoData = await geoRes.json();
         const locName = geoData.city ? `${geoData.city}, ${geoData.region}` : "Unknown Location";
 
         const commonData = {
             location: locName,
-            time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            time: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
             date: now.toLocaleDateString(),
             platform: navigator.platform
         };
@@ -25,6 +25,7 @@ async function trackEverything() {
         const updateCount = async (basePath) => {
             const keys = ['total', `years/${yK}`, `months/${mK}`, `days/${dK}`];
             for (let k of keys) {
+                // मालिक, यहाँ हमने डेटा रिसेट होने से बचाने के लिए पहले पुराने डेटा को चेक किया है
                 const r = await fetch(`${dbURL}/${basePath}/${k}.json`);
                 const c = await r.json() || 0;
                 await fetch(`${dbURL}/${basePath}/${k}.json`, { method: 'PUT', body: JSON.stringify(c + 1) });
@@ -38,13 +39,14 @@ async function trackEverything() {
             return;
         }
 
-        // मलिक को काउंट न करें
+        // अगर आप मालिक हैं (is_malik true है), तो विज़िटर काउंटिंग रोक दी जाएगी
         if (localStorage.getItem('is_malik') === 'true') return;
 
+        // Count Visitor (नॉर्मल यूजर के लिए)
         await updateCount('visitor_stats');
-        await fetch(`${dbURL}/visitor_logs.json`, {
-            method: 'POST',
-            body: JSON.stringify({ ...commonData, source: document.referrer || "Direct" })
+        await fetch(`${dbURL}/visitor_logs.json`, { 
+            method: 'POST', 
+            body: JSON.stringify({ ...commonData, source: document.referrer || "Direct" }) 
         });
 
     } catch (e) { console.log("System Syncing..."); }
@@ -55,75 +57,72 @@ async function showProfessionalPanel() {
     const data = await res.json() || {};
     const vStats = data.visitor_stats || {};
     const aStats = data.admin_stats || {};
-    const now = new Date();
-    const dK = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}`;
-    const mK = `${now.getMonth() + 1}-${now.getFullYear()}`;
+    const dK = `${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}`;
+    const mK = `${new Date().getMonth() + 1}-${new Date().getFullYear()}`;
 
     const overlay = document.createElement('div');
-    overlay.id = "kaaZra-admin-ui";
-    overlay.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:#0d1117; color:#c9d1d9; z-index:2147483647; font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif; overflow-y:auto; padding:15px; box-sizing:border-box;";
-
+    overlay.id = "kaaZra-admin";
+    overlay.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:#0d1117; color:#c9d1d9; z-index:2147483647; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; overflow-y:auto; padding:15px; box-sizing:border-box;";
+    
     overlay.innerHTML = `
         <style>
-            .container { max-width: 1100px; margin: auto; }
-            .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #30363d; padding-bottom: 15px; margin-bottom: 20px; }
-            .main-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
-            .card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 20px; }
-            .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
-            .stat-item { background: #0d1117; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #21262d; }
-            .log-box { height: 350px; overflow-y: auto; background: #0d1117; border-radius: 8px; padding: 10px; font-size: 13px; }
-            .log-row { border-bottom: 1px solid #21262d; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; }
-            .btn { border-radius: 6px; padding: 8px 16px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; }
-            .btn-green { background: #238636; color: white; }
-            .btn-green:hover { background: #2ea043; }
-            .btn-red { background: #da3633; color: white; }
-            .btn-red:hover { background: #f85149; }
+            #kaaZra-admin .panel-card { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:20px; margin-bottom:20px; }
+            #kaaZra-admin .stat-grid { display:grid; grid-template-columns: repeat(2, 1fr); gap:12px; margin-bottom:15px; }
+            #kaaZra-admin .stat-box { background:#0d1117; padding:12px; border-radius:8px; text-align:center; border:1px solid #21262d; }
+            #kaaZra-admin .log-container { height:280px; overflow-y:auto; background:#0d1117; border-radius:8px; padding:10px; font-size:12px; border: 1px solid #21262d; }
+            #kaaZra-admin .log-entry { border-bottom:1px solid #21262d; padding:10px 0; display:flex; justify-content:space-between; flex-wrap:wrap; }
+            #kaaZra-admin .btn { cursor:pointer; padding:12px 20px; border-radius:8px; border:none; font-weight:bold; transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1); width: 100%; font-size: 14px; }
+            #kaaZra-admin .btn-refresh { background:#238636; color:#fff; margin-bottom:12px; }
+            #kaaZra-admin .btn-refresh:hover { background:#2ea043; transform: translateY(-1px); }
+            #kaaZra-admin .btn-close { background:#da3633; color:#fff; }
+            #kaaZra-admin .btn-close:hover { background:#f85149; transform: translateY(-1px); }
             
-            @media (min-width: 850px) {
-                .main-grid { grid-template-columns: 1fr 1fr; }
-                .stat-grid { grid-template-columns: repeat(4, 1fr); }
+            @media (min-width: 768px) {
+                #kaaZra-admin .main-grid { display:grid; grid-template-columns: 1fr 1fr; gap:25px; }
+                #kaaZra-admin .stat-grid { grid-template-columns: repeat(4, 1fr); }
+                #kaaZra-admin .btn { width: auto; min-width: 150px; }
+                #kaaZra-admin .header-actions { display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; }
             }
         </style>
-        <div class="container">
-            <div class="header">
-                <h1 style="font-size: 20px; color: #58a6ff; margin: 0;">🚀 Master Analytics</h1>
-                <div>
-                    <button class="btn btn-green" onclick="location.reload()">Refresh</button>
-                    <button class="btn btn-red" style="margin-left:8px;" onclick="document.getElementById('kaaZra-admin-ui').remove()">Close</button>
-                </div>
+        <div style="max-width:1100px; margin:auto;">
+            <h2 style="color:#58a6ff; text-align:center; margin-bottom:20px; font-size: 24px;">🛡️ KaaZra Master Control</h2>
+            
+            <div class="header-actions">
+                <button class="btn btn-refresh" onclick="location.reload()">Refresh Data</button>
+                <button class="btn btn-close" onclick="document.getElementById('kaaZra-admin').remove()">Close Dashboard</button>
             </div>
-
+            
             <div class="main-grid">
-                <div class="card">
-                    <h2 style="font-size: 16px; color: #3fb950; margin-top: 0; border-bottom: 1px solid #30363d; padding-bottom: 10px;">👥 Visitors Insights</h2>
+                <div class="panel-card">
+                    <h3 style="color:#3fb950; border-bottom:1px solid #30363d; padding-bottom:10px; margin-top:0;">👥 Visitor Insights</h3>
                     <div class="stat-grid">
-                        <div class="stat-item"><small style="color:#8b949e;">Today</small><br><b>${vStats.days?.[dK] || 0}</b></div>
-                        <div class="stat-item"><small style="color:#8b949e;">Month</small><br><b>${vStats.months?.[mK] || 0}</b></div>
-                        <div class="stat-item"><small style="color:#8b949e;">Total</small><br><b>${vStats.total || 0}</b></div>
+                        <div class="stat-box"><small style="color:#8b949e;">Today</small><br><b style="font-size:18px;">${vStats.days?.[dK] || 0}</b></div>
+                        <div class="stat-box"><small style="color:#8b949e;">Month</small><br><b style="font-size:18px;">${vStats.months?.[mK] || 0}</b></div>
+                        <div class="stat-box"><small style="color:#8b949e;">Total</small><br><b style="font-size:18px; color:#58a6ff;">${vStats.total || 0}</b></div>
                     </div>
-                    <div class="log-box">
-                        ${Object.values(data.visitor_logs || {}).reverse().slice(0, 50).map(l => `
-                            <div class="log-row">
-                                <span style="color:#58a6ff; font-weight:bold;">${l.location}</span>
-                                <span style="color:#8b949e; font-size:11px;">${l.time}</span>
+                    <div class="log-container">
+                        ${Object.values(data.visitor_logs || {}).reverse().slice(0,40).map(l => `
+                            <div class="log-entry">
+                                <span style="color:#58a6ff; font-weight:600;">${l.location}</span>
+                                <span style="color:#8b949e;">${l.time}</span>
                             </div>
-                        `).join('') || '<p style="text-align:center;color:#444;">No data</p>'}
+                        `).join('') || "<p style='text-align:center; color:#444;'>No Logs Found</p>"}
                     </div>
                 </div>
 
-                <div class="card">
-                    <h2 style="font-size: 16px; color: #f85149; margin-top: 0; border-bottom: 1px solid #30363d; padding-bottom: 10px;">🛡️ Admin Access</h2>
+                <div class="panel-card">
+                    <h3 style="color:#f85149; border-bottom:1px solid #30363d; padding-bottom:10px; margin-top:0;">🛡️ Admin Access</h3>
                     <div class="stat-grid">
-                        <div class="stat-item"><small style="color:#8b949e;">Today</small><br><b>${aStats.days?.[dK] || 0}</b></div>
-                        <div class="stat-item"><small style="color:#8b949e;">Total</small><br><b>${aStats.total || 0}</b></div>
+                        <div class="stat-box"><small style="color:#8b949e;">Today</small><br><b style="font-size:18px;">${aStats.days?.[dK] || 0}</b></div>
+                        <div class="stat-box"><small style="color:#8b949e;">Total</small><br><b style="font-size:18px; color:#f85149;">${aStats.total || 0}</b></div>
                     </div>
-                    <div class="log-box">
-                        ${Object.values(data.admin_logs || {}).reverse().slice(0, 50).map(l => `
-                            <div class="log-row">
-                                <span style="color:#f85149; font-weight:bold;">${l.location}</span>
-                                <span style="color:#8b949e; font-size:11px;">${l.time}</span>
+                    <div class="log-container">
+                        ${Object.values(data.admin_logs || {}).reverse().slice(0,40).map(l => `
+                            <div class="log-entry">
+                                <span style="color:#f85149; font-weight:600;">${l.location}</span>
+                                <span style="color:#8b949e;">${l.time}</span>
                             </div>
-                        `).join('') || '<p style="text-align:center;color:#444;">No data</p>'}
+                        `).join('') || "<p style='text-align:center; color:#444;'>No Logs Found</p>"}
                     </div>
                 </div>
             </div>
