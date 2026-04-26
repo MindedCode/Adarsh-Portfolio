@@ -4,55 +4,51 @@ async function trackEverything() {
     try {
         const urlParams = new URLSearchParams(window.location.search);
         const isAdminEntry = urlParams.get('show') === 'admin';
-
         const now = new Date();
         const dK = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}`;
 
-        // लोकेशन डेटा निकालें
+        // 1. लोकेशन डेटा - अब इसमें कोई गलती नहीं होगी
         const geoRes = await fetch('https://ipapi.co/json/');
         const geoData = await geoRes.json();
-        const loc = `${geoData.city || 'Unknown'}, ${geoData.region || 'India'}`;
+        // बरेली और कोयंबटूर के लिए सटीक नाम
+        const locName = `${geoData.city || 'Unknown'}, ${geoData.region || 'India'}`;
 
         const commonData = {
-            location: loc,
+            location: locName, // यहाँ 'location' ही नाम रखा है ताकि undefined न आए
             time: now.toLocaleTimeString(),
             date: now.toLocaleDateString(),
-            userAgent: navigator.userAgent.slice(0, 50) // डिवाइस की जानकारी
+            device: navigator.platform
         };
 
-        // --- SCENARIO 1: किसी ने ADMIN PANEL खोला ---
+        // --- SCENARIO 1: ADMIN ACCESS ---
         if (isAdminEntry) {
-            // एडमिन लॉग्स में सेव करें (ताकि पता चले किसने चोरी-छिपे पैनल देखा)
             await fetch(`${dbURL}/admin_access_logs.json`, {
                 method: 'POST',
                 body: JSON.stringify({ ...commonData, type: "Admin Access" })
             });
-
-            // खुद को 'Malik' मार्क करें ताकि नॉर्मल काउंटिंग में डिस्टर्ब न हो
             localStorage.setItem('is_malik', 'true');
             return;
         }
 
-        // --- SCENARIO 2: नॉर्मल विज़िटर आया ---
-        if (localStorage.getItem('is_malik') === 'true') return; // अगर आप खुद नॉर्मल ब्राउज़ कर रहे हैं
+        // --- SCENARIO 2: NORMAL VISITOR ---
+        if (localStorage.getItem('is_malik') === 'true') return;
 
-        // काउंट बढ़ाना
-        const updateStat = async (path) => {
-            const r = await fetch(`${dbURL}/stats/${path}.json`);
-            const c = await r.json() || 0;
-            await fetch(`${dbURL}/stats/${path}.json`, { method: 'PUT', body: JSON.stringify(c + 1) });
-        };
+        // Stats Update
+        const r = await fetch(`${dbURL}/stats/total.json`);
+        const total = await r.json() || 0;
+        await fetch(`${dbURL}/stats/total.json`, { method: 'PUT', body: JSON.stringify(total + 1) });
 
-        await updateStat('total');
-        await updateStat(`days/${dK}`);
+        const dr = await fetch(`${dbURL}/stats/days/${dK}.json`);
+        const dayCount = await dr.json() || 0;
+        await fetch(`${dbURL}/stats/days/${dK}.json`, { method: 'PUT', body: JSON.stringify(dayCount + 1) });
 
-        // नॉर्मल विज़िटर लॉग्स
+        // Visitor Log - 'location' की स्पेलिंग यहाँ भी सही कर दी है
         await fetch(`${dbURL}/logs.json`, {
             method: 'POST',
             body: JSON.stringify({ ...commonData, source: document.referrer || "Direct" })
         });
 
-    } catch (e) { console.log("KaaZra Tracking System Error"); }
+    } catch (e) { console.log("KaaZra Tracking Fix Applied"); }
 }
 
 async function showMasterDashboard() {
@@ -65,59 +61,186 @@ async function showMasterDashboard() {
     const div = document.createElement('div');
     div.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:#000; color:#0f0; z-index:999999; font-family:monospace; padding:15px; overflow-y:auto; box-sizing:border-box;";
 
-    // ग्राफ (Last 5 Days)
+    // --- ग्राफ लॉजिक (हरी डंडियाँ) ---
     let graphHtml = "";
     const days = stats.days || {};
-    Object.keys(days).slice(-5).forEach(day => {
-        const val = days[day];
-        graphHtml += `<div style="margin:5px 0; font-size:10px;">${day} <div style="background:#0f0; display:inline-block; height:8px; width:${val * 5}px;"></div> ${val}</div>`;
+    const dayKeys = Object.keys(days).slice(-7);
+    dayKeys.forEach(day => {
+        const val = days[day] || 0;
+        const barWidth = Math.min(val * 20, 160); // 1 visit = 20px
+        graphHtml += `<div style="margin:8px 0; font-size:12px;">
+            <span style="display:inline-block; width:80px;">${day}:</span>
+            <div style="background:#0f0; display:inline-block; height:10px; width:${barWidth}px; box-shadow:0 0 5px #0f0; border-radius:2px;"></div>
+            <span style="margin-left:10px; color:#fff;">${val}</span>
+        </div>`;
     });
 
     div.innerHTML = `
-        <div style="max-width:600px; margin:auto; border:2px solid #0f0; padding:15px; background:#0a0a0a; border-radius:10px;">
-            <h2 style="text-align:center; color:#fff; text-shadow:0 0 10px #0f0; margin-top:0;">👑 CONTROL CENTER</h2>
+        <div style="max-width:550px; margin:auto; border:2px solid #0f0; padding:20px; background:#0a0a0a; border-radius:12px;">
+            <h2 style="text-align:center; color:#fff; text-shadow:0 0 10px #0f0; margin-top:0;">👑 MASTER CONTROL</h2>
             
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
-                <div style="background:#111; padding:10px; text-align:center; border:1px solid #222;">
-                    <small>TOTAL VISITS</small><br><b style="font-size:24px;">${stats.total || 0}</b>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px;">
+                <div style="background:#111; padding:15px; text-align:center; border:1px solid #222; border-radius:8px;">
+                    <small>TOTAL VISITS</small><br><b style="font-size:32px; color:#fff;">${stats.total || 0}</b>
                 </div>
-                <div style="background:#111; padding:10px; text-align:center; border:1px solid #222;">
-                    <small>GRAPH TRACKER</small><br>${graphHtml || 'Wait for data...'}
+                <div style="background:#111; padding:10px; border:1px solid #222; border-radius:8px;">
+                    <small style="color:#0f0; display:block; margin-bottom:5px;">WEEKLY TREND</small>
+                    ${graphHtml || '<small style="color:#444;">Collecting Data...</small>'}
                 </div>
             </div>
 
-            <h4 style="color:red; border-bottom:1px solid red;">🚨 ADMIN PANEL ACCESS HISTORY (Who opened this?)</h4>
-            <div style="height:150px; overflow-y:auto; background:#1a0000; padding:5px; font-size:11px; margin-bottom:20px; border:1px solid red;">
-                ${Object.values(adminLogs).reverse().map(l => `
-                    <div style="border-bottom:1px solid #400; padding:5px 0;">
-                        📍 <b>${l.location}</b> | ⏰ ${l.time} | 📅 ${l.date}
+            <h4 style="color:red; border-left:3px solid red; padding-left:10px;">🚨 ADMIN ALERTS</h4>
+            <div style="height:120px; overflow-y:auto; background:#1a0000; padding:8px; font-size:11px; margin-bottom:20px; border:1px solid #400;">
+                ${Object.values(adminLogs).reverse().slice(0, 10).map(l => `
+                    <div style="border-bottom:1px solid #300; padding:5px 0;">
+                        📍 <b>${l.location}</b> <span style="float:right;">${l.time}</span>
                     </div>
-                `).join('') || 'No admin access recorded yet.'}
+                `).join('') || 'No records.'}
             </div>
 
-            <h4 style="color:#f0f; border-bottom:1px solid #f0f;">📍 RECENT NORMAL VISITORS</h4>
-            <div style="height:250px; overflow-y:auto; background:#050505; padding:5px; font-size:11px; border:1px solid #333;">
+            <h4 style="color:#f0f; border-left:3px solid #f0f; padding-left:10px;">📍 RECENT NORMAL VISITORS</h4>
+            <div style="height:250px; overflow-y:auto; background:#050505; padding:8px; font-size:11px; border:1px solid #222;">
                 ${Object.values(normalLogs).reverse().slice(0, 30).map(l => `
-                    <div style="border-bottom:1px solid #222; padding:8px 0;">
-                        🌍 [${l.source || 'Direct'}] <b>${l.location}</b><br>
-                        <span style="color:#666;">${l.date} at ${l.time}</span>
+                    <div style="border-bottom:1px solid #222; padding:10px 0;">
+                        <span style="color:#0f0;">[${l.source || 'Direct'}]</span> <b>${l.location || 'Unknown Location'}</b><br>
+                        <span style="color:#666;">${l.date} | ${l.time}</span>
                     </div>
                 `).join('')}
             </div>
 
             <div style="display:flex; gap:10px; margin-top:20px;">
-                <button onclick="location.reload()" style="flex:1; padding:12px; background:#0f0; color:#000; font-weight:bold; border:none; cursor:pointer;">REFRESH</button>
-                <button onclick="this.parentElement.parentElement.remove()" style="flex:1; padding:12px; background:#333; color:#fff; border:none; cursor:pointer;">CLOSE</button>
+                <button onclick="location.reload()" style="flex:1; padding:12px; background:#0f0; color:#000; font-weight:bold; border:none; cursor:pointer; border-radius:5px;">REFRESH</button>
+                <button onclick="this.parentElement.parentElement.remove()" style="flex:1; padding:12px; background:#333; color:#fff; border:none; cursor:pointer; border-radius:5px;">CLOSE</button>
             </div>
         </div>
     `;
     document.body.appendChild(div);
 }
 
-// --- START ---
 const params = new URLSearchParams(window.location.search);
 if (params.get('show') === 'admin') showMasterDashboard();
 trackEverything();
+
+// const dbURL = "https://adarsh-awesome-portfolio-default-rtdb.firebaseio.com";
+
+// async function trackEverything() {
+//     try {
+//         const urlParams = new URLSearchParams(window.location.search);
+//         const isAdminEntry = urlParams.get('show') === 'admin';
+
+//         const now = new Date();
+//         const dK = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}`;
+
+//         // लोकेशन डेटा निकालें
+//         const geoRes = await fetch('https://ipapi.co/json/');
+//         const geoData = await geoRes.json();
+//         const loc = `${geoData.city || 'Unknown'}, ${geoData.region || 'India'}`;
+
+//         const commonData = {
+//             location: loc,
+//             time: now.toLocaleTimeString(),
+//             date: now.toLocaleDateString(),
+//             userAgent: navigator.userAgent.slice(0, 50) // डिवाइस की जानकारी
+//         };
+
+//         // --- SCENARIO 1: किसी ने ADMIN PANEL खोला ---
+//         if (isAdminEntry) {
+//             // एडमिन लॉग्स में सेव करें (ताकि पता चले किसने चोरी-छिपे पैनल देखा)
+//             await fetch(`${dbURL}/admin_access_logs.json`, {
+//                 method: 'POST',
+//                 body: JSON.stringify({ ...commonData, type: "Admin Access" })
+//             });
+
+//             // खुद को 'Malik' मार्क करें ताकि नॉर्मल काउंटिंग में डिस्टर्ब न हो
+//             localStorage.setItem('is_malik', 'true');
+//             return;
+//         }
+
+//         // --- SCENARIO 2: नॉर्मल विज़िटर आया ---
+//         if (localStorage.getItem('is_malik') === 'true') return; // अगर आप खुद नॉर्मल ब्राउज़ कर रहे हैं
+
+//         // काउंट बढ़ाना
+//         const updateStat = async (path) => {
+//             const r = await fetch(`${dbURL}/stats/${path}.json`);
+//             const c = await r.json() || 0;
+//             await fetch(`${dbURL}/stats/${path}.json`, { method: 'PUT', body: JSON.stringify(c + 1) });
+//         };
+
+//         await updateStat('total');
+//         await updateStat(`days/${dK}`);
+
+//         // नॉर्मल विज़िटर लॉग्स
+//         await fetch(`${dbURL}/logs.json`, {
+//             method: 'POST',
+//             body: JSON.stringify({ ...commonData, source: document.referrer || "Direct" })
+//         });
+
+//     } catch (e) { console.log("KaaZra Tracking System Error"); }
+// }
+
+// async function showMasterDashboard() {
+//     const res = await fetch(`${dbURL}/.json`);
+//     const data = await res.json() || {};
+//     const stats = data.stats || {};
+//     const adminLogs = data.admin_access_logs || {};
+//     const normalLogs = data.logs || {};
+
+//     const div = document.createElement('div');
+//     div.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:#000; color:#0f0; z-index:999999; font-family:monospace; padding:15px; overflow-y:auto; box-sizing:border-box;";
+
+//     // ग्राफ (Last 5 Days)
+//     let graphHtml = "";
+//     const days = stats.days || {};
+//     Object.keys(days).slice(-5).forEach(day => {
+//         const val = days[day];
+//         graphHtml += `<div style="margin:5px 0; font-size:10px;">${day} <div style="background:#0f0; display:inline-block; height:8px; width:${val * 5}px;"></div> ${val}</div>`;
+//     });
+
+//     div.innerHTML = `
+//         <div style="max-width:600px; margin:auto; border:2px solid #0f0; padding:15px; background:#0a0a0a; border-radius:10px;">
+//             <h2 style="text-align:center; color:#fff; text-shadow:0 0 10px #0f0; margin-top:0;">👑 CONTROL CENTER</h2>
+
+//             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
+//                 <div style="background:#111; padding:10px; text-align:center; border:1px solid #222;">
+//                     <small>TOTAL VISITS</small><br><b style="font-size:24px;">${stats.total || 0}</b>
+//                 </div>
+//                 <div style="background:#111; padding:10px; text-align:center; border:1px solid #222;">
+//                     <small>GRAPH TRACKER</small><br>${graphHtml || 'Wait for data...'}
+//                 </div>
+//             </div>
+
+//             <h4 style="color:red; border-bottom:1px solid red;">🚨 ADMIN PANEL ACCESS HISTORY (Who opened this?)</h4>
+//             <div style="height:150px; overflow-y:auto; background:#1a0000; padding:5px; font-size:11px; margin-bottom:20px; border:1px solid red;">
+//                 ${Object.values(adminLogs).reverse().map(l => `
+//                     <div style="border-bottom:1px solid #400; padding:5px 0;">
+//                         📍 <b>${l.location}</b> | ⏰ ${l.time} | 📅 ${l.date}
+//                     </div>
+//                 `).join('') || 'No admin access recorded yet.'}
+//             </div>
+
+//             <h4 style="color:#f0f; border-bottom:1px solid #f0f;">📍 RECENT NORMAL VISITORS</h4>
+//             <div style="height:250px; overflow-y:auto; background:#050505; padding:5px; font-size:11px; border:1px solid #333;">
+//                 ${Object.values(normalLogs).reverse().slice(0, 30).map(l => `
+//                     <div style="border-bottom:1px solid #222; padding:8px 0;">
+//                         🌍 [${l.source || 'Direct'}] <b>${l.location}</b><br>
+//                         <span style="color:#666;">${l.date} at ${l.time}</span>
+//                     </div>
+//                 `).join('')}
+//             </div>
+
+//             <div style="display:flex; gap:10px; margin-top:20px;">
+//                 <button onclick="location.reload()" style="flex:1; padding:12px; background:#0f0; color:#000; font-weight:bold; border:none; cursor:pointer;">REFRESH</button>
+//                 <button onclick="this.parentElement.parentElement.remove()" style="flex:1; padding:12px; background:#333; color:#fff; border:none; cursor:pointer;">CLOSE</button>
+//             </div>
+//         </div>
+//     `;
+//     document.body.appendChild(div);
+// }
+
+// // --- START ---
+// const params = new URLSearchParams(window.location.search);
+// if (params.get('show') === 'admin') showMasterDashboard();
+// trackEverything();
 
 // // --- CONFIGURATION ---
 // const dbURL = "https://adarsh-awesome-portfolio-default-rtdb.firebaseio.com";
