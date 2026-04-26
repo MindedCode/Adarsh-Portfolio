@@ -1,38 +1,44 @@
-// 1. ID वही रखें जो HTML में है
 var contactForm = document.getElementById("contact-form");
+var thankYouBox = document.getElementById("thank-you-message");
+var statusMsg = document.getElementById("my-form-status");
 
 async function handleSubmit(event) {
     event.preventDefault();
-    var status = document.getElementById("my-form-status");
     var data = new FormData(event.target);
-
-    // 2. बटन की सही ID का उपयोग करें
     var button = document.getElementById("submit-btn");
-
+    
+    // बटन को डिसेबल करें ताकि बार-बार क्लिक न हो
     button.disabled = true;
-    status.innerHTML = "Processing...";
+    button.innerHTML = "Sending...";
 
     fetch(event.target.action, {
-        method: contactForm.method, // यहाँ contactForm का उपयोग करें
+        method: 'POST',
         body: data,
         headers: {
             'Accept': 'application/json'
         }
     }).then(response => {
         if (response.ok) {
-            status.style.color = "#28a745";
-            status.innerHTML = "शुक्रिया! आपका संदेश हमें मिल गया है। 😊";
-            contactForm.reset();
+            // --- यहाँ से मैजिक शुरू होता है ---
+            contactForm.style.display = "none"; // फॉर्म गायब
+            thankYouBox.style.display = "block"; // थैंक यू मैसेज प्रकट
+            thankYouBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
         } else {
-            status.style.color = "red";
-            status.innerHTML = "ओह! कुछ गड़बड़ हो गई।";
+            // अगर एरर आए तो बटन वापस ठीक करें
+            button.disabled = false;
+            button.innerHTML = "Send Message";
+            statusMsg.style.color = "red";
+            statusMsg.innerHTML = "Error! Please try again.";
         }
     }).catch(error => {
-        status.style.color = "red";
-        status.innerHTML = "इंटरनेट कनेक्शन चेक करें।";
-    }).finally(() => {
         button.disabled = false;
+        button.innerHTML = "Send Message";
+        statusMsg.style.color = "red";
+        statusMsg.innerHTML = "Network connection problem.";
     });
 }
 
-contactForm.addEventListener("submit", handleSubmit);
+// फॉर्म पर इवेंट लिसनर लगाएँ
+if (contactForm) {
+    contactForm.addEventListener("submit", handleSubmit);
+}

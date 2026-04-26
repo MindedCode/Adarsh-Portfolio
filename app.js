@@ -79,7 +79,7 @@ function type() {
     charIndex--;
     typeSpeed = 100; // Slight speed increase when deleting
   } else {
-    // अक्षर जोड़ना
+    // Add the Letter
     textElement.textContent = currentWord.substring(0, charIndex + 1);
     charIndex++;
     typeSpeed = 200;

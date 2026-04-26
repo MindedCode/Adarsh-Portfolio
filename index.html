@@ -25,7 +25,7 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-    <!--     <link rel="icon" href="https://mindedfolks.blogspot.com/favicon.ico" type="image/x-icon"> -->
+    <!-- <link rel="icon" href="https://mindedfolks.blogspot.com/favicon.ico" type="image/x-icon"> -->
 
 
     <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
@@ -329,80 +329,52 @@
                 <input type="submit" value="Login">
             </form> -->
 
-            <!-- <form action="https://formspree.io/f/mzdyooll" method="post"> -->
-
-            <!-- for modified with ai. -->
-
-            <form action="https://formspree.io/f/xdayjewy" method="post" id="contact-form">
-                <div class="input-wrap">
-                    <input type="text" name="name" placeholder="Your Name *" required>
-
-                    <input type="email" name="email" placeholder="Your Email *" required>
+            <div id="contact-section">
+                <div id="thank-you-message"
+                    style="display: none; text-align: center; padding: 40px; background: #f9f9f9; border-radius: 10px;">
+                    <h2 style="color: #28a745; font-size: 2rem;">शुक्रिया! 😊</h2>
+                    <p style="font-size: 1.1rem;">आपका संदेश हमें मिल गया है। मैं जल्द ही आपसे संपर्क करूँगा।</p>
                 </div>
 
-                <div class="input-wrap-2">
-                    <input type="text" name="subject" placeholder="Your Subject... ">
-                    <textarea name="message" cols="30" rows="10" placeholder="Your Message..."></textarea>
+                <form action="https://formspree.io/f/xdayjewy" method="POST" id="contact-form">
+                    <div class="input-wrap">
+                        <input type="text" name="name" placeholder="Your Name *" required>
+                        <input type="email" name="email" placeholder="Your Email *" required>
+                    </div>
+
+                    <div class="input-wrap-2">
+                        <input type="text" name="subjectgi tbr" placeholder="Your Subject... ">
+                        <textarea name="message" cols="30" rows="10" placeholder="Your Message..."></textarea>
+                    </div>
+
+                    <div class="btn-wrapper">
+                        <button type="submit" id="submit-btn" class="btn btn-primary">Send Message</button>
+                    </div>
+                    <p id="my-form-status" style="margin-top: 10px; font-weight: bold;"></p>
+                </form>
+            </div>
+
+            <div id="contact-section">
+                <div id="thank-you-message" style="display: none; text-align: center; padding: 50px;">
+                    <h2 style="color: #28a745;">शुक्रिया! 😊</h2>
+                    <p>आपका संदेश हमें मिल गया है। मैं जल्द ही आपसे संपर्क करूँगा।</p>
                 </div>
 
-                <div class="btn-wrapper">
-                    <!-- <button type="submit" class="btn btn-primary"> Send Message</button> -->
-                    <button type="submit" id="submit-btn" class="btn btn-primary">Send Message</button>
-                </div>
-                <p id="my-form-status" style="margin-top: 10px; font-weight: bold;"></p>
-            </form>
-            
-            <!-- <form action="https://formspree.io/f/xqewjeoz" method="post">
-                <div class="input-wrap">
-                    <input type="text" name="username" placeholder="Your Name *" required>
-                    <input type="email" name="email" placeholder="Your Email *" required> -->
-                    <!-- <input type="text" placeholder="Your Name *" required>
-                    <input type="text" placeholder="Your Email *" required> -->
-                <!-- </div>
-                <div class="input-wrap-2">
-                    <input type="text" name="subject" placeholder="Your Subject... ">
-                    <textarea name="message" id="" cols="30" rows="10" placeholder="Your Message..."></textarea>
-                </div>
+                <!-- <form action="https://formspree.io/f/xdayjewy" method="POST" id="contact-form">
+                    <div class="input-wrap">
+                        <input type="text" name="name" placeholder="Your Name *" required>
+                        <input type="email" name="email" placeholder="Your Email *" required>
+                    </div>
+                    <div class="input-wrap-2">
+                        <textarea name="message" cols="30" rows="10" placeholder="Your Message..."></textarea>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button type="submit" id="submit-btn" class="btn btn-primary">Send Message</button>
+                    </div>
+                </form>
+            </div> -->
 
-                <div class="btn-wrapper">
-                    <button class="btn btn-primary"> Send Message</button>
-                </div>
-            </form> -->
-            <!-- sir ka code -->
-            <!-- <form action="">
-                <div class="input-wrap">
-                    <input type="text" placeholder="Your Name *">
-                    <input type="email" placeholder="Your Email *">
-                </div>
-                <div class="input-wrap-2">
-                    <input type="text" placeholder="Your Subject...">
-                    <textarea name="" id="" cols="30" rows="10" placeholder="Your Message..."></textarea>
-                </div>
-                <div class="btn-wrapper">
-                    <button class="btn btn-primary">Send Message</button>
-                </div>
-            </form> -->
-
-            <!-- <form action="https://formspree.io/f/xdayjewy" method="post">
-                <label for="email">Your Name</label>
-                <input name="Name" id="name" type="name">
-                <label for="email">Your Email</label>
-                <input name="Email" id="email" type="email"> -->
-                <!-- <input name="meassage" id=""> -->
-                <!-- <button type="submit">Submit</button>
-            </form> -->
-
-            <!-- for formspree... -->
-            <!-- <form action="https://formspree.io/f/mzdyooll" method="post">
-                <label for="email">Your Email</label>
-                <input name="Email" id="email" type="email">
-                <button type="submit">Submit</button>
-            </form> -->
-
-
-            <!-- modified form -->
-
-            <!-- <form action="signup.php" method="post">
+                <!-- <form action="signup.php" method="post">
                 <div class="input-wrap">
                     <input type="text" name="username" placeholder="Your Name *" required>
                     <input type="password" name="password" placeholder="Your Email *" required>
@@ -417,8 +389,7 @@
                 </div>
             </form> -->
 
-
-        </div>
+            </div>
     </section>
     <footer>
 
