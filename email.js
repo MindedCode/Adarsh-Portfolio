@@ -7,7 +7,7 @@ async function handleSubmit(event) {
     var data = new FormData(event.target);
     var button = document.getElementById("submit-btn");
     
-    // बटन को डिसेबल करें ताकि बार-बार क्लिक न हो
+    // Disable the button to prevent repeated clicking
     button.disabled = true;
     button.innerHTML = "Sending...";
 
@@ -19,12 +19,12 @@ async function handleSubmit(event) {
         }
     }).then(response => {
         if (response.ok) {
-            // --- यहाँ से मैजिक शुरू होता है ---
-            contactForm.style.display = "none"; // फॉर्म गायब
-            thankYouBox.style.display = "block"; // थैंक यू मैसेज प्रकट
+            // --- Here's where the magic begins ---
+            contactForm.style.display = "none"; //form missing
+            thankYouBox.style.display = "block"; // Thank you message appears
             thankYouBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
         } else {
-            // अगर एरर आए तो बटन वापस ठीक करें
+            // If an error occurs, return the correct button
             button.disabled = false;
             button.innerHTML = "Send Message";
             statusMsg.style.color = "red";
@@ -37,8 +37,7 @@ async function handleSubmit(event) {
         statusMsg.innerHTML = "Network connection problem.";
     });
 }
-
-// फॉर्म पर इवेंट लिसनर लगाएँ
+// Add an event listener to the form
 if (contactForm) {
     contactForm.addEventListener("submit", handleSubmit);
 }

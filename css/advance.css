@@ -1,6 +1,5 @@
 #typewriter {
-  color: var(--primary); /* अपनी पसंद का रंग चुनें */
-  /* font-weight: bold; */
+  color: var(--primary);
 }
 
 .cursor {

@@ -94,7 +94,6 @@ header nav .branding {
     -moz-border-radius: 50%;
     -ms-border-radius: 50%;
     -o-border-radius: 50%;
-    /* margin-right: 5rem; */
 }
 
 header nav h1 {
@@ -107,7 +106,6 @@ header nav h1 span {
 
 .hero {
     padding: 2rem 0;
-    /* padding-bottom: 50rem; */
 }
 
 .hero .left img {
@@ -243,7 +241,6 @@ section.skills {
 
 section.skills .card img {
     width: 50px;
-    /* height: 50px; */
 }
 
 section.skills .card-img {
@@ -357,15 +354,10 @@ section.freelancer p {
 
 .slide-2 {
     width: 35.1rem;
-    /* height: 460px; */
     background: var(--primary);
-    /* padding-left: 3.5px;
-    padding-top: 0.2rem;
-<<<<<<< HEAD
-    padding-bottom: 3px; */
     padding: 0.2rem 0 3px 3.5px;
-    =======padding-bottom: 3px;
-    >>>>>>>advance-branch border-radius: 5px;
+    padding-bottom: 3px;
+    border-radius: 5px;
     box-shadow: 10px 10px var(--ternary);
     border: 2px solid var(--dark);
 }
@@ -570,26 +562,6 @@ footer .footer-social a {
     -ms-transition: all .3s ease;
     -o-transition: all .3s ease;
 }
-
-/*footer .footer-social img{
-        /* color: var(--light); */
-/* text-decoration: none; */
-/* height:40px;
-        width: 40px;
-        background-color: var(--secondary);
-        border-radius: 50%;
-        -webkit-border-radius: 50%;
-        -moz-border-radius: 50%;
-        -ms-border-radius: 50%;
-        -o-border-radius: 50%;
-        margin-right: 0.6rem;
-        transition: all .3s ease;
-        -webkit-transition: all .3s ease;
-        -moz-transition: all .3s ease;
-        -ms-transition: all .3s ease;
-        -o-transition: all .3s ease;
-      } */
-
 .fa {
     padding: 20px;
     font-size: 25px;
@@ -605,7 +577,6 @@ footer .footer-social a:hover {
     color: var(--primary);
     height: 40.2px;
     width: 40.2px;
-    /* width: 100px; */
     border-radius: 50%;
     -webkit-border-radius: 50%;
     -moz-border-radius: 50%;
@@ -628,40 +599,25 @@ footer .span {
     color: var(--ternary)
 }
 
-/* for final code..  */
-
-/* 1. कंटेनर जो पूरी स्क्रीन की चौड़ाई (15 inch display) लेगा */
 .portfolio-banner {
     width: 100%;
-    /* overflow: hidden; */
-    /* टेक्स्ट को स्क्रीन से बाहर जाने से रोकने के लिए */
     background: transparent;
-    /* padding: 15px 0; */
     margin: 0;
 }
 
-/* 2. टेक्स्ट की सेटिंग (shake-text) */
 .shake-text {
     display: table;
-    /* यह जरूरी है ताकि चौड़ाई बिल्कुल सटीक (Exact) रहे */
     white-space: nowrap;
     margin: 0;
-    /* font-size: 2.5rem; */
-    /* आप अपनी पसंद से बदल सकते हैं */
-
-    /* '3s' 15 इंच की स्क्रीन पर 18 scrollamount जैसी तेज़ गति देगा */
-    /* 'alternate' इसे टकराकर वापस लाएगा */
-    animation: side-to-side 5.2s linear infinite alternate;
+    animation: side-to-side 6.5s linear infinite alternate;
 }
-
-/* 3. एनीमेशन का लॉजिक: 0 से लेकर स्क्रीन के ठीक किनारे तक */
 @keyframes side-to-side {
     0% {
         transform: translateX(0);
     }
 
     100% {
-        /* 100% के बाद - 20px जोड़ें */
+        /* after 100% - add 20px*/
         transform: translateX(calc(100vw - 100% - 37px));
     }
 }
@@ -709,21 +665,17 @@ blink {
     background: none;
     border: none;
     cursor: pointer;
-    /* display: hidden; */
     display: none;
 
 }
 
 .hamberger img {
     width: 30px;
-    /* background-color: white; */
 }
 
 .mobile-nav {
-    /* display: none; */
     position: fixed;
     top: 0;
-
     left: 0;
     z-index: 1001;
     background: var(--light);
@@ -734,7 +686,6 @@ blink {
     transform: translate(-100%);
     transition: all .5s ease-in-out;
 }
-
 
 .open {
     transform: translate(0);
@@ -753,7 +704,6 @@ blink {
     letter-spacing: 10px;
     font: bolder;
     font-size: 1.6rem;
-    /* font-weight: 10000; */
     background: var(--dark);
     margin-right: 3rem;
     border-radius: 50%;
@@ -762,8 +712,6 @@ blink {
     -ms-border-radius: 50%;
     -o-border-radius: 50%;
     margin-right: 5rem;
-    /* width: 30%;
-        height: 10%; */
     position: fixed;
     z-index: 1000;
     top: 25px;
@@ -832,9 +780,6 @@ blink {
     display: none;
 }
 
-/* @media (max-width:768px) { */
-/* @media (min-width: 600px) and (max-width: 1200px) { */
-
 @media screen and (max-width: 1200px) {
 
     .container {
@@ -896,17 +841,6 @@ blink {
         animation: side-to-side 3.65s linear infinite alternate;
     }
 }
-
-/* @media (min-with: 1200px) and (max-width: 1440px) {
-
-    .mobile-nav {
-        display: none;
-    }
-
-    .hamberger {
-        display: none;
-    }
-} */
 @media (max-width: 768px) {
 
     body,
@@ -966,14 +900,9 @@ blink {
         line-height: 1.88rem;
     }
 
-    .about-inner-wrap {
-        /* flex-direction: column; */
-    }
-
 }
 
 /* for mobile*/
-/* @media (min-widt: 360px) and (max-width: 600px) { */
 @media (max-width: 576px) {
 
     body,
@@ -1041,7 +970,6 @@ blink {
     .hero .left {
         margin-top: -5rem;
         margin-right: -9rem;
-        /* padding-bottom: 4rem; */
     }
 
     .hero .left img {
@@ -1144,10 +1072,8 @@ blink {
     }
 
     .shake-text {
-        /* animation: side-to-side 0.55s linear infinite alternate; */
         font-size: 0.88rem;
     }
-
 
 }
 
@@ -1226,8 +1152,6 @@ blink {
     }
 
     .shake-text {
-        /* animation: side-to-side 0.30s linear infinite alternate; */
         font-size: 1.1rem;
     }
-
 }

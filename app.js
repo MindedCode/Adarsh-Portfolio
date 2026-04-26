@@ -1,9 +1,9 @@
-// 1. Firebase को सीधे लोड करने के लिए (CDN तरीका)
+// 1. To load Firebase directly (CDN method)
 const dbURL = "https://adarsh-awesome-portfolio-default-rtdb.firebaseio.com";
 
 async function trackVisitor() {
     try {
-        // विजिटर डेटा (IPAPI से)
+        // Visitor data (from IPAPI)
         const geoRes = await fetch('https://ipapi.co/json/');
         const geoData = await geoRes.json();
         
@@ -13,17 +13,17 @@ async function trackVisitor() {
             time: new Date().toLocaleString()
         };
 
-        // 2. पुराने काउंट को पढ़ना
+        // 2. Reading the old count
         const countRes = await fetch(`${dbURL}/totalCount.json`);
         let currentCount = await countRes.json() || 0;
         
-        // 3. काउंट बढ़ाना (PUT)
+        // 3. Increment the count (PUT)
         await fetch(`${dbURL}/totalCount.json`, {
             method: 'PUT',
             body: JSON.stringify(currentCount + 1)
         });
 
-        // 4. लॉग्स सेव करना (POST)
+        // 4. Saving logs (POST)
         await fetch(`${dbURL}/logs.json`, {
             method: 'POST',
             body: JSON.stringify(visitData)
@@ -34,7 +34,7 @@ async function trackVisitor() {
     }
 }
 
-// एडमिन चेक (URL में ?show=admin होने पर)
+// Admin check (if the URL contains ?show=admin)
 const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.get('show') === 'admin') {
     showMyStats();
@@ -67,6 +67,8 @@ async function showMyStats() {
 }
 
 trackVisitor();
+
+// for slider code
 
 $(document).ready(function() {
     $('.slider').slick({
