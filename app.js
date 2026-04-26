@@ -1,159 +1,117 @@
+// --- CONFIGURATION ---
 const dbURL = "https://adarsh-awesome-portfolio-default-rtdb.firebaseio.com";
 
+// --- VISITOR TRACKING (BACKEND) ---
 async function trackVisitor() {
     try {
-        // 1. सोर्स का पता लगाना (Referrer Logic)
+        const urlParams = new URLSearchParams(window.location.search);
+
+        // 1. मालिक की पहचान: अगर ?show=admin है, तो ब्राउज़र में निशान लगा दो
+        if (urlParams.get('show') === 'admin') {
+            localStorage.setItem('is_malik', 'true');
+        }
+
+        // 2. अगर मालिक है, तो काउंटिंग यहीं रोक दो
+        if (localStorage.getItem('is_malik') === 'true') {
+            console.log("Pranaam Malik! Tracking disabled for you.");
+            return;
+        }
+
+        const now = new Date();
+        const dK = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}`;
+        const mK = `${now.getMonth() + 1}-${now.getFullYear()}`;
+        const yK = now.getFullYear();
+
+        // 3. कहाँ से आया (Referrer)
         const ref = document.referrer.toLowerCase();
         let source = "Direct / WhatsApp";
+        if (ref.includes("linkedin")) source = "LinkedIn";
+        else if (ref.includes("facebook") || ref.includes("fb.me")) source = "Facebook";
+        else if (ref.includes("instagram")) source = "Instagram";
+        else if (ref.includes("github")) source = "GitHub";
 
-        if (ref.includes("linkedin.com")) source = "LinkedIn";
-        else if (ref.includes("facebook.com") || ref.includes("fb.me")) source = "Facebook";
-        else if (ref.includes("t.co") || ref.includes("twitter.com") || ref.includes("x.com")) source = "X (Twitter)";
-        else if (ref.includes("instagram.com")) source = "Instagram";
-        else if (ref.includes("youtube.com")) source = "YouTube";
-        else if (ref.includes("github.com")) source = "GitHub";
-
-        // 2. लोकेशन और टाइम डेटा
+        // 4. लोकेशन डेटा (IP API)
         const geoRes = await fetch('https://ipapi.co/json/');
         const geoData = await geoRes.json();
 
         const visitData = {
-            source: source,
+            source,
             city: geoData.city || "Unknown",
             country: geoData.country_name || "Unknown",
-            time: new Date().toLocaleString()
+            time: now.toLocaleTimeString(),
+            fullDate: now.toLocaleDateString()
         };
 
-        // 3. टोटल विज़िट्स बढ़ाना (पुराना वाला लॉजिक - Total Count)
-        const countRes = await fetch(`${dbURL}/totalCount.json`);
-        let currentCount = await countRes.json() || 0;
+        // 5. Firebase में काउंट बढ़ाना
+        const updateCount = async (path) => {
+            const r = await fetch(`${dbURL}/stats/${path}.json`);
+            const c = await r.json() || 0;
+            await fetch(`${dbURL}/stats/${path}.json`, { method: 'PUT', body: JSON.stringify(c + 1) });
+        };
 
-        await fetch(`${dbURL}/totalCount.json`, {
-            method: 'PUT',
-            body: JSON.stringify(currentCount + 1)
-        });
+        await updateCount('total');
+        await updateCount(`years/${yK}`);
+        await updateCount(`months/${mK}`);
+        await updateCount(`days/${dK}`);
 
-        // 4. लॉग्स सेव करना (नया वाला लॉजिक - Visitor History)
-        await fetch(`${dbURL}/logs.json`, {
-            method: 'POST',
-            body: JSON.stringify(visitData)
-        });
+        // 6. लॉग्स सेव करना (History)
+        await fetch(`${dbURL}/logs.json`, { method: 'POST', body: JSON.stringify(visitData) });
 
-    } catch (e) {
-        console.log("Tracking skip...");
-    }
+    } catch (e) { console.log("Tracking error..."); }
 }
 
-// एडमिन पैनल देखने के लिए (?show=admin)
+// --- ADMIN PANEL UI (FRONTEND) ---
+async function showAdminPanel() {
+    try {
+        const res = await fetch(`${dbURL}/.json`);
+        const data = await res.json();
+        const stats = data.stats || {};
+        const now = new Date();
+        const dK = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}`;
+        const mK = `${now.getMonth() + 1}-${now.getFullYear()}`;
+
+        const div = document.createElement('div');
+        div.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); color:#0f0; z-index:99999; font-family:monospace; padding:20px; overflow-y:auto; box-sizing:border-box;";
+
+        div.innerHTML = `
+            <div style="max-width:550px; margin:auto; border:2px solid #0f0; padding:20px; border-radius:15px; box-shadow: 0 0 20px #0f0;">
+                <h1 style="text-align:center; color:#fff; text-shadow: 0 0 10px #0f0; margin-top:0;">👑 MASTER DASHBOARD</h1>
+                
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin:25px 0;">
+                    <div style="background:#111; border:1px solid #333; padding:15px; text-align:center; border-radius:10px;">
+                        <small style="color:#888;">TODAY</small><br><b style="font-size:24px;">${stats.days?.[dK] || 0}</b>
+                    </div>
+                    <div style="background:#111; border:1px solid #333; padding:15px; text-align:center; border-radius:10px;">
+                        <small style="color:#888;">MONTH</small><br><b style="font-size:24px;">${stats.months?.[mK] || 0}</b>
+                    </div>
+                    <div style="background:#020; border:1px solid #0f0; padding:15px; text-align:center; border-radius:10px; grid-column: span 2;">
+                        <small style="color:#ccc;">TOTAL ALL TIME</small><br><b style="font-size:32px; color:#fff;">${stats.total || 0}</b>
+                    </div>
+                </div>
+
+                <h3 style="border-bottom:1px solid #333; padding-bottom:5px;">RECENT ACTIVITY</h3>
+                <div style="background:#0a0a0a; padding:10px; border-radius:8px; max-height:300px; overflow-y:auto;">
+                    ${Object.values(data.logs || {}).reverse().slice(0, 15).map(log => `
+                        <div style="margin-bottom:10px; border-bottom:1px solid #222; padding-bottom:8px; font-size:12px;">
+                            <span style="color:#f0f; font-weight:bold;">[${log.source}]</span> 
+                            <span style="color:#fff;">${log.city}, ${log.country}</span>
+                            <div style="color:#888; margin-top:3px;">⏰ ${log.time} | ${log.fullDate || ''}</div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <button onclick="this.parentElement.parentElement.remove()" style="margin-top:25px; width:100%; background:#0f0; color:#000; border:none; padding:15px; font-weight:bold; border-radius:8px; cursor:pointer; font-size:16px;">EXIT PANEL</button>
+            </div>`;
+        document.body.appendChild(div);
+    } catch (e) { alert("Data load fail!"); }
+}
+
+// --- EXECUTION ---
 const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.get('show') === 'admin') {
     showAdminPanel();
 }
-
-async function showAdminPanel() {
-    const res = await fetch(`${dbURL}/.json`);
-    const data = await res.json();
-
-    const div = document.createElement('div');
-    div.style = "position:fixed; top:10px; left:10px; background:rgba(0,0,0,0.95); color:#00ff00; padding:15px; border-radius:8px; z-index:10000; font-family:monospace; border:1px solid #00ff00; max-height:85vh; overflow-y:auto; width:280px; box-shadow: 0 0 15px rgba(0,255,0,0.2);";
-
-    let logsHtml = "";
-    if (data.logs) {
-        // ताज़ा 10 विजिट्स दिखाने के लिए
-        Object.values(data.logs).reverse().slice(0, 10).forEach(log => {
-            logsHtml += `
-                <div style="border-bottom:1px solid #333; padding:8px 0; font-size:11px;">
-                    <span style="color:#ff00ff;">🌐 ${log.source}</span><br>
-                    📍 ${log.city}, ${log.country}<br>
-                    ⏰ ${log.time}
-                </div>`;
-        });
-    }
-
-    div.innerHTML = `
-        <h3 style="margin:0 0 10px 0; text-align:center; border-bottom:1px solid #00ff00;">MALIK'S PANEL</h3>
-        <p style="font-size:18px; margin:10px 0;">Total Visits: <b style="color:#fff;">${data.totalCount || 0}</b></p>
-        <hr style="border:0.5px solid #333;">
-        <p style="margin:5px 0; font-weight:bold;">Recent Visitors:</p>
-        <div id="logs-list">${logsHtml}</div>
-        <button onclick="this.parentElement.remove()" style="margin-top:15px; width:100%; background:#444; color:#fff; border:none; padding:5px; cursor:pointer; border-radius:4px;">Close</button>
-    `;
-    document.body.appendChild(div);
-}
-
-// मास्टर फंक्शन को कॉल करें
 trackVisitor();
-
-// for old code.------------------------------
-// 1. To load Firebase directly (CDN method)
-// const dbURL = "https://adarsh-awesome-portfolio-default-rtdb.firebaseio.com";
-
-// async function trackVisitor() {
-//     try {
-//         // Visitor data (from IPAPI)
-//         const geoRes = await fetch('https://ipapi.co/json/');
-//         const geoData = await geoRes.json();
-
-//         const visitData = {
-//             city: geoData.city || "Unknown",
-//             country: geoData.country_name || "Unknown",
-//             time: new Date().toLocaleString()
-//         };
-
-//         // 2. Reading the old count
-//         const countRes = await fetch(`${dbURL}/totalCount.json`);
-//         let currentCount = await countRes.json() || 0;
-
-//         // 3. Increment the count (PUT)
-//         await fetch(`${dbURL}/totalCount.json`, {
-//             method: 'PUT',
-//             body: JSON.stringify(currentCount + 1)
-//         });
-
-//         // 4. Saving logs (POST)
-//         await fetch(`${dbURL}/logs.json`, {
-//             method: 'POST',
-//             body: JSON.stringify(visitData)
-//         });
-
-//     } catch (e) {
-//         console.log("Tracking skip...");
-//     }
-// }
-
-// // Admin check (if the URL contains ?show=admin)
-// const urlParams = new URLSearchParams(window.location.search);
-// if (urlParams.get('show') === 'admin') {
-//     showMyStats();
-// }
-
-// async function showMyStats() {
-//     const res = await fetch(`${dbURL}/.json`);
-//     const data = await res.json();
-
-//     const div = document.createElement('div');
-//     div.style = "position:fixed; top:10px; left:10px; background:rgba(0,0,0,0.9); color:#00ff00; padding:15px; border-radius:8px; z-index:9999; font-family:monospace; border:1px solid #00ff00; max-height:80vh; overflow-y:auto; width:250px;";
-
-//     div.innerHTML = `
-//         <h3 style="margin:0 0 10px 0;">📊 Admin Panel</h3>
-//         <p style="font-size:20px;">Visits: <b>${data.totalCount || 0}</b></p>
-//         <hr style="border:0.5px solid #333;">
-//         <p>Recent Logs:</p>
-//         <div id="logs-list" style="font-size:11px;"></div>
-//         <button onclick="this.parentElement.remove()" style="margin-top:10px; width:100%; cursor:pointer;">Close</button>
-//     `;
-
-//     document.body.appendChild(div);
-
-//     if(data.logs) {
-//         const logsDiv = document.getElementById('logs-list');
-//         Object.values(data.logs).reverse().slice(0, 5).forEach(log => {
-//             logsDiv.innerHTML += `<div>📍 ${log.city} (${log.time})</div><br>`;
-//         });
-//     }
-// }
-
-// trackVisitor();
 
 // for slider code
 
