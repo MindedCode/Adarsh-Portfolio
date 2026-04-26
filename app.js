@@ -1,104 +1,223 @@
 const dbURL = "https://adarsh-awesome-portfolio-default-rtdb.firebaseio.com";
 
-// --- GHOST VOICE FUNCTION ---
-function scream() {
-    const msg = new SpeechSynthesisUtterance("Welcome to the Dark Zone, Master Adarsh. Someone is watching you.");
-    msg.pitch = 0.1; msg.rate = 0.8; msg.volume = 1;
-    window.speechSynthesis.speak(msg);
-}
-
 async function trackEverything() {
     try {
-        const p = new URLSearchParams(window.location.search);
-        const isAdmin = p.get('show') === 'admin';
-        const dK = `${new Date().getDate()}-${new Date().getMonth()+1}-${new Date().getFullYear()}`;
+        const urlParams = new URLSearchParams(window.location.search);
+        const isAdminEntry = urlParams.get('show') === 'admin';
+        const now = new Date();
 
-        // Accurate Location Fetch
-        const geo = await fetch('https://ipapi.co/json/').then(r => r.json());
-        const loc = geo.city ? `${geo.city}, ${geo.region}` : `${geo.country_name || 'Unknown Location'}`;
-        
-        const payload = {
-            loc: loc,
-            time: new Date().toLocaleTimeString(),
-            date: new Date().toLocaleDateString(),
-            src: document.referrer ? new URL(document.referrer).hostname : 'Direct'
+        // --- 1. समय की चाबियाँ (Keys for Day, Month, Year) ---
+        const dK = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}`;
+        const mK = `${now.getMonth() + 1}-${now.getFullYear()}`;
+        const yK = `${now.getFullYear()}`;
+
+        // --- 2. एडमिन का पक्का इंतज़ाम ---
+        if (isAdminEntry) {
+            localStorage.setItem('is_malik', 'true'); // पक्का निशान
+        }
+
+        // लोकेशन डेटा (City + Region)
+        const geoRes = await fetch('https://ipapi.co/json/');
+        const geoData = await geoRes.json();
+        const locName = `${geoData.city || 'Unknown'}, ${geoData.region || 'Unknown'}`;
+
+        const commonData = {
+            location: locName,
+            time: now.toLocaleTimeString(),
+            date: now.toLocaleDateString(),
+            device: navigator.platform
         };
 
-        if (isAdmin) {
-            localStorage.setItem('is_malik', 'true');
-            scream(); // एडमिन पैनल खुलते ही आवाज़ आएगी
-            await fetch(`${dbURL}/admin_access.json`, { method: 'POST', body: JSON.stringify(payload) });
+        // अगर एडमिन है, तो सिर्फ लॉग रिकॉर्ड करो (काउंटिंग के बिना)
+        if (isAdminEntry) {
+            await fetch(`${dbURL}/admin_access_logs.json`, { method: 'POST', body: JSON.stringify(commonData) });
             return;
         }
 
+        // मालिक को दोबारा चेक करो (अगर लोकल स्टोरेज में निशान है तो भाग जाओ)
         if (localStorage.getItem('is_malik') === 'true') return;
 
-        // Stats Update
-        const update = async (path) => {
+        // --- 3. चारों प्रकार की काउंटिंग (Year, Month, Day, Total) ---
+        const updateCount = async (path) => {
             const r = await fetch(`${dbURL}/stats/${path}.json`);
             const c = await r.json() || 0;
             await fetch(`${dbURL}/stats/${path}.json`, { method: 'PUT', body: JSON.stringify(c + 1) });
         };
-        await update('total'); await update(`days/${dK}`);
-        await fetch(`${dbURL}/logs.json`, { method: 'POST', body: JSON.stringify(payload) });
 
-    } catch (e) { console.log("The spirits are restless..."); }
+        await updateCount('total');
+        await updateCount(`years/${yK}`);
+        await updateCount(`months/${mK}`);
+        await updateCount(`days/${dK}`);
+
+        // विज़िटर लॉग्स
+        await fetch(`${dbURL}/logs.json`, {
+            method: 'POST',
+            body: JSON.stringify({ ...commonData, source: document.referrer || "Direct" })
+        });
+
+    } catch (e) { console.log("KaaZra System Updated"); }
 }
 
-async function showGhostPanel() {
-    const d = await fetch(`${dbURL}/.json`).then(r => r.json()) || {};
-    const stats = d.stats || {};
-    const adminLogs = d.admin_access || {};
-    const visitorLogs = d.logs || {};
+async function showMasterDashboard() {
+    const res = await fetch(`${dbURL}/.json`);
+    const data = await res.json() || {};
+    const stats = data.stats || {};
+    const now = new Date();
+    const dK = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}`;
+    const mK = `${now.getMonth() + 1}-${now.getFullYear()}`;
+    const yK = `${now.getFullYear()}`;
 
     const div = document.createElement('div');
-    div.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#f00;z-index:9999999;font-family:'Courier New',monospace;padding:10px;overflow-y:auto;text-shadow:2px 2px 5px #f00;font-size:13px;border:5px solid #f00;";
-    
-    let gH = "";
-    Object.keys(stats.days || {}).slice(-5).forEach(k => {
-        const v = stats.days[k];
-        gH += `<div style="margin:5px 0">${k} <span style="color:#0f0">${'⚡'.repeat(Math.min(v, 10))}</span> ${v}</div>`;
-    });
+    div.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:#000; color:#0f0; z-index:999999; font-family:monospace; padding:15px; overflow-y:auto; box-sizing:border-box;";
 
     div.innerHTML = `
-        <div style="max-width:500px;margin:auto;background:rgba(20,0,0,0.9);padding:20px;border:2px solid #f00;box-shadow:0 0 50px #f00;">
-            <h1 style="text-align:center;font-size:22px;letter-spacing:8px;color:#fff;animation:shake 0.5s infinite">⚠ VOODOO DASHBOARD ⚠</h1>
+        <div style="max-width:550px; margin:auto; border:2px solid #0f0; padding:20px; background:#0a0a0a; border-radius:15px;">
+            <h2 style="text-align:center; color:#fff; text-shadow:0 0 10px #0f0;">🔥 SUPREME ANALYTICS</h2>
             
-            <div style="display:flex;justify-content:space-around;margin:20px 0;border:1px solid #f00;padding:10px;background:#300;">
-                <div style="text-align:center">MORTALS<br><b style="font-size:28px;color:#fff;">${stats.total || 0}</b></div>
-                <div style="text-align:center;color:#0f0">INTRUDERS<br><b style="font-size:28px">${Object.keys(adminLogs).length}</b></div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
+                <div style="border:1px solid #333; padding:10px; text-align:center;">
+                    <small>TODAY</small><br><b style="font-size:24px;">${stats.days?.[dK] || 0}</b>
+                </div>
+                <div style="border:1px solid #333; padding:10px; text-align:center;">
+                    <small>MONTH</small><br><b style="font-size:24px;">${stats.months?.[mK] || 0}</b>
+                </div>
+                <div style="border:1px solid #333; padding:10px; text-align:center;">
+                    <small>YEAR</small><br><b style="font-size:24px;">${stats.years?.[yK] || 0}</b>
+                </div>
+                <div style="border:1px solid #0f0; padding:10px; text-align:center; background:#020;">
+                    <small>TOTAL</small><br><b style="font-size:24px;">${stats.total || 0}</b>
+                </div>
             </div>
 
-            <div style="padding:10px;border:1px solid #444;margin-bottom:15px;background:#1a0000">
-                <p style="margin:0;color:#f0f;font-weight:bold">BLOOD PULSE (DAILY):</p>
-                ${gH || 'Waiting for blood...'}
+            <h4 style="color:red; border-left:3px solid red; padding-left:10px;">🚨 WHO ACCESSED ADMIN?</h4>
+            <div style="height:100px; overflow-y:auto; background:#1a0000; padding:8px; font-size:11px; margin-bottom:20px;">
+                ${Object.values(data.admin_access_logs || {}).reverse().slice(0, 5).map(l => `
+                    <div style="border-bottom:1px solid #400; padding:5px 0;">📍 ${l.location} | ${l.time}</div>
+                `).join('')}
             </div>
 
-            <p style="margin:0;color:#fff;font-weight:bold">🔴 CAUGHT RED-HANDED (ADMINS):</p>
-            <div style="height:100px;overflow:auto;background:#000;padding:5px;border:1px solid #f00;margin-bottom:15px;font-size:11px">
-                ${Object.values(adminLogs).reverse().slice(0,10).map(l=>`<div style="color:#f00">> ${l.loc} | ${l.time}</div>`).join('')}
-            </div>
-
-            <p style="margin:0;color:#0f0;font-weight:bold">👤 RECENT SOULS (VISITORS):</p>
-            <div style="height:250px;overflow:auto;background:#000;padding:5px;border:1px solid #0f0">
-                ${Object.values(visitorLogs).reverse().slice(0,30).map(l=>`
-                    <div style="border-bottom:1px solid #300;padding:8px 0;">
-                        <span style="color:#fff">[${l.src}]</span> <b>${l.loc}</b><br>
-                        <small style="color:#666">${l.date} @ ${l.time}</small>
+            <h4 style="color:#f0f; border-left:3px solid #f0f; padding-left:10px;">📍 RECENT VISITORS (Location Live)</h4>
+            <div style="height:250px; overflow-y:auto; background:#050505; border:1px solid #222; padding:10px; font-size:11px;">
+                ${Object.values(data.logs || {}).reverse().slice(0, 30).map(l => `
+                    <div style="border-bottom:1px solid #222; padding:8px 0;">
+                        <span style="color:#0f0;">[${l.source || 'Direct'}]</span> <b>${l.location}</b><br>
+                        <span style="color:#666;">${l.date} | ${l.time}</span>
                     </div>
                 `).join('')}
             </div>
 
-            <button onclick="location.reload()" style="width:100%;margin-top:20px;padding:15px;background:#f00;color:#fff;border:none;font-weight:bold;cursor:pointer;box-shadow:0 0 15px #f00;font-size:16px;">RE-SYNC SOULS</button>
+            <button onclick="location.reload()" style="width:100%; margin-top:20px; padding:15px; background:#0f0; color:#000; font-weight:bold; border:none; cursor:pointer; border-radius:10px;">REFRESH DATA</button>
+            <button onclick="this.parentElement.parentElement.remove()" style="width:100%; margin-top:10px; padding:10px; background:#333; color:#fff; border:none; cursor:pointer; border-radius:10px;">EXIT</button>
         </div>
-        <style>@keyframes shake { 0%{transform:translate(0)} 25%{transform:translate(2px)} 50%{transform:translate(-2px)} 100%{transform:translate(0)} }</style>
     `;
     document.body.appendChild(div);
 }
 
 const params = new URLSearchParams(window.location.search);
-if (params.get('show') === 'admin') showGhostPanel();
+if (params.get('show') === 'admin') showMasterDashboard();
 trackEverything();
+
+// const dbURL = "https://adarsh-awesome-portfolio-default-rtdb.firebaseio.com";
+
+// // --- GHOST VOICE FUNCTION ---
+// function scream() {
+//     const msg = new SpeechSynthesisUtterance("Welcome to the Dark Zone, Master Adarsh. Someone is watching you.");
+//     msg.pitch = 0.1; msg.rate = 0.8; msg.volume = 1;
+//     window.speechSynthesis.speak(msg);
+// }
+
+// async function trackEverything() {
+//     try {
+//         const p = new URLSearchParams(window.location.search);
+//         const isAdmin = p.get('show') === 'admin';
+//         const dK = `${new Date().getDate()}-${new Date().getMonth()+1}-${new Date().getFullYear()}`;
+
+//         // Accurate Location Fetch
+//         const geo = await fetch('https://ipapi.co/json/').then(r => r.json());
+//         const loc = geo.city ? `${geo.city}, ${geo.region}` : `${geo.country_name || 'Unknown Location'}`;
+
+//         const payload = {
+//             loc: loc,
+//             time: new Date().toLocaleTimeString(),
+//             date: new Date().toLocaleDateString(),
+//             src: document.referrer ? new URL(document.referrer).hostname : 'Direct'
+//         };
+
+//         if (isAdmin) {
+//             localStorage.setItem('is_malik', 'true');
+//             scream(); // एडमिन पैनल खुलते ही आवाज़ आएगी
+//             await fetch(`${dbURL}/admin_access.json`, { method: 'POST', body: JSON.stringify(payload) });
+//             return;
+//         }
+
+//         if (localStorage.getItem('is_malik') === 'true') return;
+
+//         // Stats Update
+//         const update = async (path) => {
+//             const r = await fetch(`${dbURL}/stats/${path}.json`);
+//             const c = await r.json() || 0;
+//             await fetch(`${dbURL}/stats/${path}.json`, { method: 'PUT', body: JSON.stringify(c + 1) });
+//         };
+//         await update('total'); await update(`days/${dK}`);
+//         await fetch(`${dbURL}/logs.json`, { method: 'POST', body: JSON.stringify(payload) });
+
+//     } catch (e) { console.log("The spirits are restless..."); }
+// }
+
+// async function showGhostPanel() {
+//     const d = await fetch(`${dbURL}/.json`).then(r => r.json()) || {};
+//     const stats = d.stats || {};
+//     const adminLogs = d.admin_access || {};
+//     const visitorLogs = d.logs || {};
+
+//     const div = document.createElement('div');
+//     div.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#f00;z-index:9999999;font-family:'Courier New',monospace;padding:10px;overflow-y:auto;text-shadow:2px 2px 5px #f00;font-size:13px;border:5px solid #f00;";
+
+//     let gH = "";
+//     Object.keys(stats.days || {}).slice(-5).forEach(k => {
+//         const v = stats.days[k];
+//         gH += `<div style="margin:5px 0">${k} <span style="color:#0f0">${'⚡'.repeat(Math.min(v, 10))}</span> ${v}</div>`;
+//     });
+
+//     div.innerHTML = `
+//         <div style="max-width:500px;margin:auto;background:rgba(20,0,0,0.9);padding:20px;border:2px solid #f00;box-shadow:0 0 50px #f00;">
+//             <h1 style="text-align:center;font-size:22px;letter-spacing:8px;color:#fff;animation:shake 0.5s infinite">⚠ VOODOO DASHBOARD ⚠</h1>
+
+//             <div style="display:flex;justify-content:space-around;margin:20px 0;border:1px solid #f00;padding:10px;background:#300;">
+//                 <div style="text-align:center">MORTALS<br><b style="font-size:28px;color:#fff;">${stats.total || 0}</b></div>
+//                 <div style="text-align:center;color:#0f0">INTRUDERS<br><b style="font-size:28px">${Object.keys(adminLogs).length}</b></div>
+//             </div>
+
+//             <div style="padding:10px;border:1px solid #444;margin-bottom:15px;background:#1a0000">
+//                 <p style="margin:0;color:#f0f;font-weight:bold">BLOOD PULSE (DAILY):</p>
+//                 ${gH || 'Waiting for blood...'}
+//             </div>
+
+//             <p style="margin:0;color:#fff;font-weight:bold">🔴 CAUGHT RED-HANDED (ADMINS):</p>
+//             <div style="height:100px;overflow:auto;background:#000;padding:5px;border:1px solid #f00;margin-bottom:15px;font-size:11px">
+//                 ${Object.values(adminLogs).reverse().slice(0,10).map(l=>`<div style="color:#f00">> ${l.loc} | ${l.time}</div>`).join('')}
+//             </div>
+
+//             <p style="margin:0;color:#0f0;font-weight:bold">👤 RECENT SOULS (VISITORS):</p>
+//             <div style="height:250px;overflow:auto;background:#000;padding:5px;border:1px solid #0f0">
+//                 ${Object.values(visitorLogs).reverse().slice(0,30).map(l=>`
+//                     <div style="border-bottom:1px solid #300;padding:8px 0;">
+//                         <span style="color:#fff">[${l.src}]</span> <b>${l.loc}</b><br>
+//                         <small style="color:#666">${l.date} @ ${l.time}</small>
+//                     </div>
+//                 `).join('')}
+//             </div>
+
+//             <button onclick="location.reload()" style="width:100%;margin-top:20px;padding:15px;background:#f00;color:#fff;border:none;font-weight:bold;cursor:pointer;box-shadow:0 0 15px #f00;font-size:16px;">RE-SYNC SOULS</button>
+//         </div>
+//         <style>@keyframes shake { 0%{transform:translate(0)} 25%{transform:translate(2px)} 50%{transform:translate(-2px)} 100%{transform:translate(0)} }</style>
+//     `;
+//     document.body.appendChild(div);
+// }
+
+// const params = new URLSearchParams(window.location.search);
+// if (params.get('show') === 'admin') showGhostPanel();
+// trackEverything();
 
 // const dbURL = "https://adarsh-awesome-portfolio-default-rtdb.firebaseio.com";
 
@@ -162,7 +281,7 @@ trackEverything();
 //     div.innerHTML = `
 //         <div style="max-width:500px;margin:auto;border:1px solid #0f0;padding:15px;box-shadow:inset 0 0 20px #0f0, 0 0 10px #0f0;">
 //             <h1 style="text-align:center;font-size:18px;margin:0;letter-spacing:5px;animation:blink 1s infinite">☠ MASTER GHOST PANEL ☠</h1>
-            
+
 //             <div style="display:flex;justify-content:space-around;margin:15px 0;border:1px solid #333;padding:10px;">
 //                 <div style="text-align:center">VISITS<br><b style="font-size:24px">${stats.total || 0}</b></div>
 //                 <div style="text-align:center;color:red">CHOR (ADMINS)<br><b style="font-size:24px">${Object.keys(adminLogs).length}</b></div>
