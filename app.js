@@ -6,116 +6,245 @@ async function trackEverything() {
         const isAdminEntry = urlParams.get('show') === 'admin';
         const now = new Date();
 
-        // --- 1. समय की चाबियाँ (Keys for Day, Month, Year) ---
         const dK = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}`;
         const mK = `${now.getMonth() + 1}-${now.getFullYear()}`;
         const yK = `${now.getFullYear()}`;
 
-        // --- 2. एडमिन का पक्का इंतज़ाम ---
-        if (isAdminEntry) {
-            localStorage.setItem('is_malik', 'true'); // पक्का निशान
-        }
-
-        // लोकेशन डेटा (City + Region)
+        // लोकेशन फेज करना
         const geoRes = await fetch('https://ipapi.co/json/');
         const geoData = await geoRes.json();
-        const locName = `${geoData.city || 'Unknown'}, ${geoData.region || 'Unknown'}`;
+        const locName = geoData.city ? `${geoData.city}, ${geoData.region}` : "Unknown Location";
 
         const commonData = {
             location: locName,
-            time: now.toLocaleTimeString(),
+            time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
             date: now.toLocaleDateString(),
-            device: navigator.platform
+            platform: navigator.platform
         };
 
-        // अगर एडमिन है, तो सिर्फ लॉग रिकॉर्ड करो (काउंटिंग के बिना)
+        const updateCount = async (basePath, timeKey) => {
+            const paths = [`${basePath}/total`, `${basePath}/years/${yK}`, `${basePath}/months/${mK}`, `${basePath}/days/${dK}`];
+            for (let path of paths) {
+                const r = await fetch(`${dbURL}/${path}.json`);
+                const c = await r.json() || 0;
+                await fetch(`${dbURL}/${path}.json`, { method: 'PUT', body: JSON.stringify(c + 1) });
+            }
+        };
+
         if (isAdminEntry) {
-            await fetch(`${dbURL}/admin_access_logs.json`, { method: 'POST', body: JSON.stringify(commonData) });
+            // एडमिन एक्सेस ट्रैक करें
+            localStorage.setItem('is_malik', 'true');
+            await updateCount('admin_stats');
+            await fetch(`${dbURL}/admin_logs.json`, { method: 'POST', body: JSON.stringify(commonData) });
             return;
         }
 
-        // मालिक को दोबारा चेक करो (अगर लोकल स्टोरेज में निशान है तो भाग जाओ)
+        // नॉर्मल विज़िटर (अगर मालिक खुद नहीं है)
         if (localStorage.getItem('is_malik') === 'true') return;
 
-        // --- 3. चारों प्रकार की काउंटिंग (Year, Month, Day, Total) ---
-        const updateCount = async (path) => {
-            const r = await fetch(`${dbURL}/stats/${path}.json`);
-            const c = await r.json() || 0;
-            await fetch(`${dbURL}/stats/${path}.json`, { method: 'PUT', body: JSON.stringify(c + 1) });
-        };
-
-        await updateCount('total');
-        await updateCount(`years/${yK}`);
-        await updateCount(`months/${mK}`);
-        await updateCount(`days/${dK}`);
-
-        // विज़िटर लॉग्स
-        await fetch(`${dbURL}/logs.json`, {
+        await updateCount('visitor_stats');
+        await fetch(`${dbURL}/visitor_logs.json`, {
             method: 'POST',
             body: JSON.stringify({ ...commonData, source: document.referrer || "Direct" })
         });
 
-    } catch (e) { console.log("KaaZra System Updated"); }
+    } catch (e) { console.log("System Ready"); }
 }
 
-async function showMasterDashboard() {
+async function showProfessionalPanel() {
     const res = await fetch(`${dbURL}/.json`);
     const data = await res.json() || {};
-    const stats = data.stats || {};
+
+    const vStats = data.visitor_stats || {};
+    const aStats = data.admin_stats || {};
     const now = new Date();
     const dK = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}`;
     const mK = `${now.getMonth() + 1}-${now.getFullYear()}`;
     const yK = `${now.getFullYear()}`;
 
-    const div = document.createElement('div');
-    div.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:#000; color:#0f0; z-index:999999; font-family:monospace; padding:15px; overflow-y:auto; box-sizing:border-box;";
+    const overlay = document.createElement('div');
+    overlay.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:#0f0f12; color:#e0e0e0; z-index:999999; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding:20px; overflow-y:auto; box-sizing:border-box;";
 
-    div.innerHTML = `
-        <div style="max-width:550px; margin:auto; border:2px solid #0f0; padding:20px; background:#0a0a0a; border-radius:15px;">
-            <h2 style="text-align:center; color:#fff; text-shadow:0 0 10px #0f0;">🔥 SUPREME ANALYTICS</h2>
-            
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
-                <div style="border:1px solid #333; padding:10px; text-align:center;">
-                    <small>TODAY</small><br><b style="font-size:24px;">${stats.days?.[dK] || 0}</b>
-                </div>
-                <div style="border:1px solid #333; padding:10px; text-align:center;">
-                    <small>MONTH</small><br><b style="font-size:24px;">${stats.months?.[mK] || 0}</b>
-                </div>
-                <div style="border:1px solid #333; padding:10px; text-align:center;">
-                    <small>YEAR</small><br><b style="font-size:24px;">${stats.years?.[yK] || 0}</b>
-                </div>
-                <div style="border:1px solid #0f0; padding:10px; text-align:center; background:#020;">
-                    <small>TOTAL</small><br><b style="font-size:24px;">${stats.total || 0}</b>
+    overlay.innerHTML = `
+        <div style="max-width:1100px; margin:auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:15px; margin-bottom:25px;">
+                <h1 style="margin:0; font-size:24px; color:#58a6ff;">🚀 Professional Analytics Dashboard</h1>
+                <div>
+                    <button onclick="location.reload()" style="background:#238636; color:white; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:600;">Refresh Data</button>
+                    <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background:#da3633; color:white; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:600; margin-left:10px;">Close</button>
                 </div>
             </div>
 
-            <h4 style="color:red; border-left:3px solid red; padding-left:10px;">🚨 WHO ACCESSED ADMIN?</h4>
-            <div style="height:100px; overflow-y:auto; background:#1a0000; padding:8px; font-size:11px; margin-bottom:20px;">
-                ${Object.values(data.admin_access_logs || {}).reverse().slice(0, 5).map(l => `
-                    <div style="border-bottom:1px solid #400; padding:5px 0;">📍 ${l.location} | ${l.time}</div>
-                `).join('')}
-            </div>
-
-            <h4 style="color:#f0f; border-left:3px solid #f0f; padding-left:10px;">📍 RECENT VISITORS (Location Live)</h4>
-            <div style="height:250px; overflow-y:auto; background:#050505; border:1px solid #222; padding:10px; font-size:11px;">
-                ${Object.values(data.logs || {}).reverse().slice(0, 30).map(l => `
-                    <div style="border-bottom:1px solid #222; padding:8px 0;">
-                        <span style="color:#0f0;">[${l.source || 'Direct'}]</span> <b>${l.location}</b><br>
-                        <span style="color:#666;">${l.date} | ${l.time}</span>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:25px;">
+                
+                <div style="background:#161b22; border:1px solid #30363d; border-radius:12px; padding:20px;">
+                    <h2 style="font-size:18px; margin-top:0; color:#3fb950; border-bottom:1px solid #30363d; padding-bottom:10px;">👥 Visitor Insights</h2>
+                    
+                    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin-bottom:20px;">
+                        <div style="text-align:center; background:#0d1117; padding:10px; border-radius:8px;"><small style="color:#8b949e;">Today</small><br><b>${vStats.days?.[dK] || 0}</b></div>
+                        <div style="text-align:center; background:#0d1117; padding:10px; border-radius:8px;"><small style="color:#8b949e;">Month</small><br><b>${vStats.months?.[mK] || 0}</b></div>
+                        <div style="text-align:center; background:#0d1117; padding:10px; border-radius:8px;"><small style="color:#8b949e;">Year</small><br><b>${vStats.years?.[yK] || 0}</b></div>
+                        <div style="text-align:center; background:#23863622; padding:10px; border-radius:8px; border:1px solid #238636;"><small style="color:#8b949e;">Total</small><br><b>${vStats.total || 0}</b></div>
                     </div>
-                `).join('')}
-            </div>
 
-            <button onclick="location.reload()" style="width:100%; margin-top:20px; padding:15px; background:#0f0; color:#000; font-weight:bold; border:none; cursor:pointer; border-radius:10px;">REFRESH DATA</button>
-            <button onclick="this.parentElement.parentElement.remove()" style="width:100%; margin-top:10px; padding:10px; background:#333; color:#fff; border:none; cursor:pointer; border-radius:10px;">EXIT</button>
+                    <div style="height:400px; overflow-y:auto; background:#0d1117; border-radius:8px; padding:10px;">
+                        ${Object.values(data.visitor_logs || {}).reverse().slice(0, 50).map(l => `
+                            <div style="border-bottom:1px solid #21262d; padding:10px 0; font-size:13px;">
+                                <div style="display:flex; justify-content:space-between;"><span style="color:#58a6ff; font-weight:bold;">${l.location}</span><span style="color:#8b949e;">${l.time}</span></div>
+                                <div style="color:#8b949e; font-size:11px; margin-top:4px;">Ref: ${l.source} | Date: ${l.date}</div>
+                            </div>
+                        `).join('') || '<p style="text-align:center; color:#444;">No visitors tracked yet.</p>'}
+                    </div>
+                </div>
+
+                <div style="background:#161b22; border:1px solid #30363d; border-radius:12px; padding:20px;">
+                    <h2 style="font-size:18px; margin-top:0; color:#f85149; border-bottom:1px solid #30363d; padding-bottom:10px;">🛡️ Admin Access Logs</h2>
+                    
+                    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin-bottom:20px;">
+                        <div style="text-align:center; background:#0d1117; padding:10px; border-radius:8px;"><small style="color:#8b949e;">Today</small><br><b>${aStats.days?.[dK] || 0}</b></div>
+                        <div style="text-align:center; background:#0d1117; padding:10px; border-radius:8px;"><small style="color:#8b949e;">Month</small><br><b>${aStats.months?.[mK] || 0}</b></div>
+                        <div style="text-align:center; background:#0d1117; padding:10px; border-radius:8px;"><small style="color:#8b949e;">Year</small><br><b>${aStats.years?.[yK] || 0}</b></div>
+                        <div style="text-align:center; background:#f8514922; padding:10px; border-radius:8px; border:1px solid #f85149;"><small style="color:#8b949e;">Total</small><br><b>${aStats.total || 0}</b></div>
+                    </div>
+
+                    <div style="height:400px; overflow-y:auto; background:#0d1117; border-radius:8px; padding:10px;">
+                        ${Object.values(data.admin_logs || {}).reverse().slice(0, 50).map(l => `
+                            <div style="border-bottom:1px solid #21262d; padding:10px 0; font-size:13px;">
+                                <div style="display:flex; justify-content:space-between;"><span style="color:#f85149; font-weight:bold;">${l.location}</span><span style="color:#8b949e;">${l.time}</span></div>
+                                <div style="color:#8b949e; font-size:11px; margin-top:4px;">Platform: ${l.platform} | Date: ${l.date}</div>
+                            </div>
+                        `).join('') || '<p style="text-align:center; color:#444;">No admin activity recorded.</p>'}
+                    </div>
+                </div>
+
+            </div>
         </div>
     `;
-    document.body.appendChild(div);
+    document.body.appendChild(overlay);
 }
 
 const params = new URLSearchParams(window.location.search);
-if (params.get('show') === 'admin') showMasterDashboard();
+if (params.get('show') === 'admin') showProfessionalPanel();
 trackEverything();
+
+// const dbURL = "https://adarsh-awesome-portfolio-default-rtdb.firebaseio.com";
+
+// async function trackEverything() {
+//     try {
+//         const urlParams = new URLSearchParams(window.location.search);
+//         const isAdminEntry = urlParams.get('show') === 'admin';
+//         const now = new Date();
+
+//         // --- 1. समय की चाबियाँ (Keys for Day, Month, Year) ---
+//         const dK = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}`;
+//         const mK = `${now.getMonth() + 1}-${now.getFullYear()}`;
+//         const yK = `${now.getFullYear()}`;
+
+//         // --- 2. एडमिन का पक्का इंतज़ाम ---
+//         if (isAdminEntry) {
+//             localStorage.setItem('is_malik', 'true'); // पक्का निशान
+//         }
+
+//         // लोकेशन डेटा (City + Region)
+//         const geoRes = await fetch('https://ipapi.co/json/');
+//         const geoData = await geoRes.json();
+//         const locName = `${geoData.city || 'Unknown'}, ${geoData.region || 'Unknown'}`;
+
+//         const commonData = {
+//             location: locName,
+//             time: now.toLocaleTimeString(),
+//             date: now.toLocaleDateString(),
+//             device: navigator.platform
+//         };
+
+//         // अगर एडमिन है, तो सिर्फ लॉग रिकॉर्ड करो (काउंटिंग के बिना)
+//         if (isAdminEntry) {
+//             await fetch(`${dbURL}/admin_access_logs.json`, { method: 'POST', body: JSON.stringify(commonData) });
+//             return;
+//         }
+
+//         // मालिक को दोबारा चेक करो (अगर लोकल स्टोरेज में निशान है तो भाग जाओ)
+//         if (localStorage.getItem('is_malik') === 'true') return;
+
+//         // --- 3. चारों प्रकार की काउंटिंग (Year, Month, Day, Total) ---
+//         const updateCount = async (path) => {
+//             const r = await fetch(`${dbURL}/stats/${path}.json`);
+//             const c = await r.json() || 0;
+//             await fetch(`${dbURL}/stats/${path}.json`, { method: 'PUT', body: JSON.stringify(c + 1) });
+//         };
+
+//         await updateCount('total');
+//         await updateCount(`years/${yK}`);
+//         await updateCount(`months/${mK}`);
+//         await updateCount(`days/${dK}`);
+
+//         // विज़िटर लॉग्स
+//         await fetch(`${dbURL}/logs.json`, {
+//             method: 'POST',
+//             body: JSON.stringify({ ...commonData, source: document.referrer || "Direct" })
+//         });
+
+//     } catch (e) { console.log("KaaZra System Updated"); }
+// }
+
+// async function showMasterDashboard() {
+//     const res = await fetch(`${dbURL}/.json`);
+//     const data = await res.json() || {};
+//     const stats = data.stats || {};
+//     const now = new Date();
+//     const dK = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}`;
+//     const mK = `${now.getMonth() + 1}-${now.getFullYear()}`;
+//     const yK = `${now.getFullYear()}`;
+
+//     const div = document.createElement('div');
+//     div.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:#000; color:#0f0; z-index:999999; font-family:monospace; padding:15px; overflow-y:auto; box-sizing:border-box;";
+
+//     div.innerHTML = `
+//         <div style="max-width:550px; margin:auto; border:2px solid #0f0; padding:20px; background:#0a0a0a; border-radius:15px;">
+//             <h2 style="text-align:center; color:#fff; text-shadow:0 0 10px #0f0;">🔥 SUPREME ANALYTICS</h2>
+
+//             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
+//                 <div style="border:1px solid #333; padding:10px; text-align:center;">
+//                     <small>TODAY</small><br><b style="font-size:24px;">${stats.days?.[dK] || 0}</b>
+//                 </div>
+//                 <div style="border:1px solid #333; padding:10px; text-align:center;">
+//                     <small>MONTH</small><br><b style="font-size:24px;">${stats.months?.[mK] || 0}</b>
+//                 </div>
+//                 <div style="border:1px solid #333; padding:10px; text-align:center;">
+//                     <small>YEAR</small><br><b style="font-size:24px;">${stats.years?.[yK] || 0}</b>
+//                 </div>
+//                 <div style="border:1px solid #0f0; padding:10px; text-align:center; background:#020;">
+//                     <small>TOTAL</small><br><b style="font-size:24px;">${stats.total || 0}</b>
+//                 </div>
+//             </div>
+
+//             <h4 style="color:red; border-left:3px solid red; padding-left:10px;">🚨 WHO ACCESSED ADMIN?</h4>
+//             <div style="height:100px; overflow-y:auto; background:#1a0000; padding:8px; font-size:11px; margin-bottom:20px;">
+//                 ${Object.values(data.admin_access_logs || {}).reverse().slice(0, 5).map(l => `
+//                     <div style="border-bottom:1px solid #400; padding:5px 0;">📍 ${l.location} | ${l.time}</div>
+//                 `).join('')}
+//             </div>
+
+//             <h4 style="color:#f0f; border-left:3px solid #f0f; padding-left:10px;">📍 RECENT VISITORS (Location Live)</h4>
+//             <div style="height:250px; overflow-y:auto; background:#050505; border:1px solid #222; padding:10px; font-size:11px;">
+//                 ${Object.values(data.logs || {}).reverse().slice(0, 30).map(l => `
+//                     <div style="border-bottom:1px solid #222; padding:8px 0;">
+//                         <span style="color:#0f0;">[${l.source || 'Direct'}]</span> <b>${l.location}</b><br>
+//                         <span style="color:#666;">${l.date} | ${l.time}</span>
+//                     </div>
+//                 `).join('')}
+//             </div>
+
+//             <button onclick="location.reload()" style="width:100%; margin-top:20px; padding:15px; background:#0f0; color:#000; font-weight:bold; border:none; cursor:pointer; border-radius:10px;">REFRESH DATA</button>
+//             <button onclick="this.parentElement.parentElement.remove()" style="width:100%; margin-top:10px; padding:10px; background:#333; color:#fff; border:none; cursor:pointer; border-radius:10px;">EXIT</button>
+//         </div>
+//     `;
+//     document.body.appendChild(div);
+// }
+
+// const params = new URLSearchParams(window.location.search);
+// if (params.get('show') === 'admin') showMasterDashboard();
+// trackEverything();
 
 // const dbURL = "https://adarsh-awesome-portfolio-default-rtdb.firebaseio.com";
 
