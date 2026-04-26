@@ -1,3 +1,90 @@
+const dbURL = "https://adarsh-awesome-portfolio-default-rtdb.firebaseio.com";
+
+async function trackVisitor() {
+    try {
+        // 1. सोर्स का पता लगाना (Referrer Logic)
+        const ref = document.referrer.toLowerCase();
+        let source = "Direct / WhatsApp"; 
+
+        if (ref.includes("linkedin.com")) source = "LinkedIn";
+        else if (ref.includes("facebook.com") || ref.includes("fb.me")) source = "Facebook";
+        else if (ref.includes("t.co") || ref.includes("twitter.com") || ref.includes("x.com")) source = "X (Twitter)";
+        else if (ref.includes("instagram.com")) source = "Instagram";
+        else if (ref.includes("youtube.com")) source = "YouTube";
+        else if (ref.includes("github.com")) source = "GitHub";
+
+        // 2. लोकेशन और टाइम डेटा
+        const geoRes = await fetch('https://ipapi.co/json/');
+        const geoData = await geoRes.json();
+        
+        const visitData = {
+            source: source,
+            city: geoData.city || "Unknown",
+            country: geoData.country_name || "Unknown",
+            time: new Date().toLocaleString()
+        };
+
+        // 3. टोटल विज़िट्स बढ़ाना (पुराना वाला लॉजिक - Total Count)
+        const countRes = await fetch(`${dbURL}/totalCount.json`);
+        let currentCount = await countRes.json() || 0;
+        
+        await fetch(`${dbURL}/totalCount.json`, {
+            method: 'PUT',
+            body: JSON.stringify(currentCount + 1)
+        });
+
+        // 4. लॉग्स सेव करना (नया वाला लॉजिक - Visitor History)
+        await fetch(`${dbURL}/logs.json`, {
+            method: 'POST',
+            body: JSON.stringify(visitData)
+        });
+
+    } catch (e) {
+        console.log("Tracking skip...");
+    }
+}
+
+// एडमिन पैनल देखने के लिए (?show=admin)
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('show') === 'admin') {
+    showAdminPanel();
+}
+
+async function showAdminPanel() {
+    const res = await fetch(`${dbURL}/.json`);
+    const data = await res.json();
+    
+    const div = document.createElement('div');
+    div.style = "position:fixed; top:10px; left:10px; background:rgba(0,0,0,0.95); color:#00ff00; padding:15px; border-radius:8px; z-index:10000; font-family:monospace; border:1px solid #00ff00; max-height:85vh; overflow-y:auto; width:280px; box-shadow: 0 0 15px rgba(0,255,0,0.2);";
+    
+    let logsHtml = "";
+    if(data.logs) {
+        // ताज़ा 10 विजिट्स दिखाने के लिए
+        Object.values(data.logs).reverse().slice(0, 10).forEach(log => {
+            logsHtml += `
+                <div style="border-bottom:1px solid #333; padding:8px 0; font-size:11px;">
+                    <span style="color:#ff00ff;">🌐 ${log.source}</span><br>
+                    📍 ${log.city}, ${log.country}<br>
+                    ⏰ ${log.time}
+                </div>`;
+        });
+    }
+
+    div.innerHTML = `
+        <h3 style="margin:0 0 10px 0; text-align:center; border-bottom:1px solid #00ff00;">MALIK'S PANEL</h3>
+        <p style="font-size:18px; margin:10px 0;">Total Visits: <b style="color:#fff;">${data.totalCount || 0}</b></p>
+        <hr style="border:0.5px solid #333;">
+        <p style="margin:5px 0; font-weight:bold;">Recent Visitors:</p>
+        <div id="logs-list">${logsHtml}</div>
+        <button onclick="this.parentElement.remove()" style="margin-top:15px; width:100%; background:#444; color:#fff; border:none; padding:5px; cursor:pointer; border-radius:4px;">Close</button>
+    `;
+    document.body.appendChild(div);
+}
+
+// मास्टर फंक्शन को कॉल करें
+trackVisitor();
+
+// for old code.------------------------------
 // 1. To load Firebase directly (CDN method)
 const dbURL = "https://adarsh-awesome-portfolio-default-rtdb.firebaseio.com";
 
