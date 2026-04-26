@@ -1,44 +1,48 @@
 const dbURL = "https://adarsh-awesome-portfolio-default-rtdb.firebaseio.com";
 
+// --- GHOST VOICE FUNCTION ---
+function scream() {
+    const msg = new SpeechSynthesisUtterance("Welcome to the Dark Zone, Master Adarsh. Someone is watching you.");
+    msg.pitch = 0.1; msg.rate = 0.8; msg.volume = 1;
+    window.speechSynthesis.speak(msg);
+}
+
 async function trackEverything() {
     try {
         const p = new URLSearchParams(window.location.search);
         const isAdmin = p.get('show') === 'admin';
-        const now = new Date();
-        const dK = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}`;
+        const dK = `${new Date().getDate()}-${new Date().getMonth()+1}-${new Date().getFullYear()}`;
 
-        // Global Location & Identity
+        // Accurate Location Fetch
         const geo = await fetch('https://ipapi.co/json/').then(r => r.json());
-        const loc = `${geo.city || 'Mars'}, ${geo.region || geo.country_name || 'System'}`;
-
+        const loc = geo.city ? `${geo.city}, ${geo.region}` : `${geo.country_name || 'Unknown Location'}`;
+        
         const payload = {
             loc: loc,
-            time: now.toLocaleTimeString(),
-            date: now.toLocaleDateString(),
-            src: document.referrer ? new URL(document.referrer).hostname : 'Direct/Status'
+            time: new Date().toLocaleTimeString(),
+            date: new Date().toLocaleDateString(),
+            src: document.referrer ? new URL(document.referrer).hostname : 'Direct'
         };
 
-        // SCENARIO: ADMIN ACCESS (Chor Pakda Gaya)
         if (isAdmin) {
             localStorage.setItem('is_malik', 'true');
+            scream(); // एडमिन पैनल खुलते ही आवाज़ आएगी
             await fetch(`${dbURL}/admin_access.json`, { method: 'POST', body: JSON.stringify(payload) });
             return;
         }
 
-        // SCENARIO: NORMAL VISITOR
         if (localStorage.getItem('is_malik') === 'true') return;
 
+        // Stats Update
         const update = async (path) => {
             const r = await fetch(`${dbURL}/stats/${path}.json`);
             const c = await r.json() || 0;
             await fetch(`${dbURL}/stats/${path}.json`, { method: 'PUT', body: JSON.stringify(c + 1) });
         };
-
-        await update('total');
-        await update(`days/${dK}`);
+        await update('total'); await update(`days/${dK}`);
         await fetch(`${dbURL}/logs.json`, { method: 'POST', body: JSON.stringify(payload) });
 
-    } catch (e) { console.log("System Haunted..."); }
+    } catch (e) { console.log("The spirits are restless..."); }
 }
 
 async function showGhostPanel() {
@@ -48,47 +52,46 @@ async function showGhostPanel() {
     const visitorLogs = d.logs || {};
 
     const div = document.createElement('div');
-    div.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#0f0;z-index:9999999;font-family:'Courier New',monospace;padding:10px;overflow-y:auto;text-shadow:0 0 5px #0f0;font-size:12px;";
-
-    // Matrix Style Graph
+    div.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#f00;z-index:9999999;font-family:'Courier New',monospace;padding:10px;overflow-y:auto;text-shadow:2px 2px 5px #f00;font-size:13px;border:5px solid #f00;";
+    
     let gH = "";
     Object.keys(stats.days || {}).slice(-5).forEach(k => {
         const v = stats.days[k];
-        gH += `<div style="margin:4px 0">${k} <span style="color:#fff">${'█'.repeat(Math.min(v, 10))}</span> ${v}</div>`;
+        gH += `<div style="margin:5px 0">${k} <span style="color:#0f0">${'⚡'.repeat(Math.min(v, 10))}</span> ${v}</div>`;
     });
 
     div.innerHTML = `
-        <div style="max-width:500px;margin:auto;border:1px solid #0f0;padding:15px;box-shadow:inset 0 0 20px #0f0, 0 0 10px #0f0;">
-            <h1 style="text-align:center;font-size:18px;margin:0;letter-spacing:5px;animation:blink 1s infinite">☠ MASTER GHOST PANEL ☠</h1>
+        <div style="max-width:500px;margin:auto;background:rgba(20,0,0,0.9);padding:20px;border:2px solid #f00;box-shadow:0 0 50px #f00;">
+            <h1 style="text-align:center;font-size:22px;letter-spacing:8px;color:#fff;animation:shake 0.5s infinite">⚠ VOODOO DASHBOARD ⚠</h1>
             
-            <div style="display:flex;justify-content:space-around;margin:15px 0;border:1px solid #333;padding:10px;">
-                <div style="text-align:center">VISITS<br><b style="font-size:24px">${stats.total || 0}</b></div>
-                <div style="text-align:center;color:red">CHOR (ADMINS)<br><b style="font-size:24px">${Object.keys(adminLogs).length}</b></div>
+            <div style="display:flex;justify-content:space-around;margin:20px 0;border:1px solid #f00;padding:10px;background:#300;">
+                <div style="text-align:center">MORTALS<br><b style="font-size:28px;color:#fff;">${stats.total || 0}</b></div>
+                <div style="text-align:center;color:#0f0">INTRUDERS<br><b style="font-size:28px">${Object.keys(adminLogs).length}</b></div>
             </div>
 
-            <div style="background:#050505;padding:10px;border:1px solid #222;margin-bottom:15px">
-                <p style="margin:0 0 5px 0;color:#f0f;font-weight:bold">DAILY PULSE:</p>
-                ${gH || 'Calculating souls...'}
+            <div style="padding:10px;border:1px solid #444;margin-bottom:15px;background:#1a0000">
+                <p style="margin:0;color:#f0f;font-weight:bold">BLOOD PULSE (DAILY):</p>
+                ${gH || 'Waiting for blood...'}
             </div>
 
-            <p style="margin:0;color:red;font-weight:bold">🔴 INTRUSION DETECTED (ADMIN ACCESS):</p>
-            <div style="height:100px;overflow:auto;background:#1a0000;padding:5px;border:1px solid red;margin-bottom:15px;font-size:10px">
-                ${Object.values(adminLogs).reverse().slice(0, 10).map(l => `<div>> ${l.loc} | ${l.time}</div>`).join('')}
+            <p style="margin:0;color:#fff;font-weight:bold">🔴 CAUGHT RED-HANDED (ADMINS):</p>
+            <div style="height:100px;overflow:auto;background:#000;padding:5px;border:1px solid #f00;margin-bottom:15px;font-size:11px">
+                ${Object.values(adminLogs).reverse().slice(0,10).map(l=>`<div style="color:#f00">> ${l.loc} | ${l.time}</div>`).join('')}
             </div>
 
-            <p style="margin:0;color:#00c3ff;font-weight:bold">👥 RECENT MORTALS (VISITORS):</p>
+            <p style="margin:0;color:#0f0;font-weight:bold">👤 RECENT SOULS (VISITORS):</p>
             <div style="height:250px;overflow:auto;background:#000;padding:5px;border:1px solid #0f0">
-                ${Object.values(visitorLogs).reverse().slice(0, 30).map(l => `
-                    <div style="border-bottom:1px solid #1a1a1a;padding:5px 0;">
-                        <span style="color:#0f0">[${l.src || 'Unknown'}]</span> <b>${l.loc || 'Shadow Realm'}</b><br>
-                        <small style="color:#555">${l.date} @ ${l.time}</small>
+                ${Object.values(visitorLogs).reverse().slice(0,30).map(l=>`
+                    <div style="border-bottom:1px solid #300;padding:8px 0;">
+                        <span style="color:#fff">[${l.src}]</span> <b>${l.loc}</b><br>
+                        <small style="color:#666">${l.date} @ ${l.time}</small>
                     </div>
                 `).join('')}
             </div>
 
-            <button onclick="location.reload()" style="width:100%;margin-top:20px;padding:15px;background:#0f0;color:#000;border:none;font-weight:bold;cursor:pointer;box-shadow:0 0 10px #0f0">RE-SYNC SYSTEM</button>
+            <button onclick="location.reload()" style="width:100%;margin-top:20px;padding:15px;background:#f00;color:#fff;border:none;font-weight:bold;cursor:pointer;box-shadow:0 0 15px #f00;font-size:16px;">RE-SYNC SOULS</button>
         </div>
-        <style>@keyframes blink { 0%, 100% {opacity:1} 50% {opacity:0.3} }</style>
+        <style>@keyframes shake { 0%{transform:translate(0)} 25%{transform:translate(2px)} 50%{transform:translate(-2px)} 100%{transform:translate(0)} }</style>
     `;
     document.body.appendChild(div);
 }
@@ -96,6 +99,105 @@ async function showGhostPanel() {
 const params = new URLSearchParams(window.location.search);
 if (params.get('show') === 'admin') showGhostPanel();
 trackEverything();
+
+// const dbURL = "https://adarsh-awesome-portfolio-default-rtdb.firebaseio.com";
+
+// async function trackEverything() {
+//     try {
+//         const p = new URLSearchParams(window.location.search);
+//         const isAdmin = p.get('show') === 'admin';
+//         const now = new Date();
+//         const dK = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}`;
+
+//         // Global Location & Identity
+//         const geo = await fetch('https://ipapi.co/json/').then(r => r.json());
+//         const loc = `${geo.city || 'Mars'}, ${geo.region || geo.country_name || 'System'}`;
+
+//         const payload = {
+//             loc: loc,
+//             time: now.toLocaleTimeString(),
+//             date: now.toLocaleDateString(),
+//             src: document.referrer ? new URL(document.referrer).hostname : 'Direct/Status'
+//         };
+
+//         // SCENARIO: ADMIN ACCESS (Chor Pakda Gaya)
+//         if (isAdmin) {
+//             localStorage.setItem('is_malik', 'true');
+//             await fetch(`${dbURL}/admin_access.json`, { method: 'POST', body: JSON.stringify(payload) });
+//             return;
+//         }
+
+//         // SCENARIO: NORMAL VISITOR
+//         if (localStorage.getItem('is_malik') === 'true') return;
+
+//         const update = async (path) => {
+//             const r = await fetch(`${dbURL}/stats/${path}.json`);
+//             const c = await r.json() || 0;
+//             await fetch(`${dbURL}/stats/${path}.json`, { method: 'PUT', body: JSON.stringify(c + 1) });
+//         };
+
+//         await update('total');
+//         await update(`days/${dK}`);
+//         await fetch(`${dbURL}/logs.json`, { method: 'POST', body: JSON.stringify(payload) });
+
+//     } catch (e) { console.log("System Haunted..."); }
+// }
+
+// async function showGhostPanel() {
+//     const d = await fetch(`${dbURL}/.json`).then(r => r.json()) || {};
+//     const stats = d.stats || {};
+//     const adminLogs = d.admin_access || {};
+//     const visitorLogs = d.logs || {};
+
+//     const div = document.createElement('div');
+//     div.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#0f0;z-index:9999999;font-family:'Courier New',monospace;padding:10px;overflow-y:auto;text-shadow:0 0 5px #0f0;font-size:12px;";
+
+//     // Matrix Style Graph
+//     let gH = "";
+//     Object.keys(stats.days || {}).slice(-5).forEach(k => {
+//         const v = stats.days[k];
+//         gH += `<div style="margin:4px 0">${k} <span style="color:#fff">${'█'.repeat(Math.min(v, 10))}</span> ${v}</div>`;
+//     });
+
+//     div.innerHTML = `
+//         <div style="max-width:500px;margin:auto;border:1px solid #0f0;padding:15px;box-shadow:inset 0 0 20px #0f0, 0 0 10px #0f0;">
+//             <h1 style="text-align:center;font-size:18px;margin:0;letter-spacing:5px;animation:blink 1s infinite">☠ MASTER GHOST PANEL ☠</h1>
+            
+//             <div style="display:flex;justify-content:space-around;margin:15px 0;border:1px solid #333;padding:10px;">
+//                 <div style="text-align:center">VISITS<br><b style="font-size:24px">${stats.total || 0}</b></div>
+//                 <div style="text-align:center;color:red">CHOR (ADMINS)<br><b style="font-size:24px">${Object.keys(adminLogs).length}</b></div>
+//             </div>
+
+//             <div style="background:#050505;padding:10px;border:1px solid #222;margin-bottom:15px">
+//                 <p style="margin:0 0 5px 0;color:#f0f;font-weight:bold">DAILY PULSE:</p>
+//                 ${gH || 'Calculating souls...'}
+//             </div>
+
+//             <p style="margin:0;color:red;font-weight:bold">🔴 INTRUSION DETECTED (ADMIN ACCESS):</p>
+//             <div style="height:100px;overflow:auto;background:#1a0000;padding:5px;border:1px solid red;margin-bottom:15px;font-size:10px">
+//                 ${Object.values(adminLogs).reverse().slice(0, 10).map(l => `<div>> ${l.loc} | ${l.time}</div>`).join('')}
+//             </div>
+
+//             <p style="margin:0;color:#00c3ff;font-weight:bold">👥 RECENT MORTALS (VISITORS):</p>
+//             <div style="height:250px;overflow:auto;background:#000;padding:5px;border:1px solid #0f0">
+//                 ${Object.values(visitorLogs).reverse().slice(0, 30).map(l => `
+//                     <div style="border-bottom:1px solid #1a1a1a;padding:5px 0;">
+//                         <span style="color:#0f0">[${l.src || 'Unknown'}]</span> <b>${l.loc || 'Shadow Realm'}</b><br>
+//                         <small style="color:#555">${l.date} @ ${l.time}</small>
+//                     </div>
+//                 `).join('')}
+//             </div>
+
+//             <button onclick="location.reload()" style="width:100%;margin-top:20px;padding:15px;background:#0f0;color:#000;border:none;font-weight:bold;cursor:pointer;box-shadow:0 0 10px #0f0">RE-SYNC SYSTEM</button>
+//         </div>
+//         <style>@keyframes blink { 0%, 100% {opacity:1} 50% {opacity:0.3} }</style>
+//     `;
+//     document.body.appendChild(div);
+// }
+
+// const params = new URLSearchParams(window.location.search);
+// if (params.get('show') === 'admin') showGhostPanel();
+// trackEverything();
 
 // const dbURL = "https://adarsh-awesome-portfolio-default-rtdb.firebaseio.com";
 
