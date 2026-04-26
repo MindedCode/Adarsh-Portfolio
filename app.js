@@ -4,7 +4,7 @@ async function trackVisitor() {
     try {
         // 1. सोर्स का पता लगाना (Referrer Logic)
         const ref = document.referrer.toLowerCase();
-        let source = "Direct / WhatsApp"; 
+        let source = "Direct / WhatsApp";
 
         if (ref.includes("linkedin.com")) source = "LinkedIn";
         else if (ref.includes("facebook.com") || ref.includes("fb.me")) source = "Facebook";
@@ -16,7 +16,7 @@ async function trackVisitor() {
         // 2. लोकेशन और टाइम डेटा
         const geoRes = await fetch('https://ipapi.co/json/');
         const geoData = await geoRes.json();
-        
+
         const visitData = {
             source: source,
             city: geoData.city || "Unknown",
@@ -27,7 +27,7 @@ async function trackVisitor() {
         // 3. टोटल विज़िट्स बढ़ाना (पुराना वाला लॉजिक - Total Count)
         const countRes = await fetch(`${dbURL}/totalCount.json`);
         let currentCount = await countRes.json() || 0;
-        
+
         await fetch(`${dbURL}/totalCount.json`, {
             method: 'PUT',
             body: JSON.stringify(currentCount + 1)
@@ -53,12 +53,12 @@ if (urlParams.get('show') === 'admin') {
 async function showAdminPanel() {
     const res = await fetch(`${dbURL}/.json`);
     const data = await res.json();
-    
+
     const div = document.createElement('div');
     div.style = "position:fixed; top:10px; left:10px; background:rgba(0,0,0,0.95); color:#00ff00; padding:15px; border-radius:8px; z-index:10000; font-family:monospace; border:1px solid #00ff00; max-height:85vh; overflow-y:auto; width:280px; box-shadow: 0 0 15px rgba(0,255,0,0.2);";
-    
+
     let logsHtml = "";
-    if(data.logs) {
+    if (data.logs) {
         // ताज़ा 10 विजिट्स दिखाने के लिए
         Object.values(data.logs).reverse().slice(0, 10).forEach(log => {
             logsHtml += `
@@ -86,78 +86,78 @@ trackVisitor();
 
 // for old code.------------------------------
 // 1. To load Firebase directly (CDN method)
-const dbURL = "https://adarsh-awesome-portfolio-default-rtdb.firebaseio.com";
+// const dbURL = "https://adarsh-awesome-portfolio-default-rtdb.firebaseio.com";
 
-async function trackVisitor() {
-    try {
-        // Visitor data (from IPAPI)
-        const geoRes = await fetch('https://ipapi.co/json/');
-        const geoData = await geoRes.json();
-        
-        const visitData = {
-            city: geoData.city || "Unknown",
-            country: geoData.country_name || "Unknown",
-            time: new Date().toLocaleString()
-        };
+// async function trackVisitor() {
+//     try {
+//         // Visitor data (from IPAPI)
+//         const geoRes = await fetch('https://ipapi.co/json/');
+//         const geoData = await geoRes.json();
 
-        // 2. Reading the old count
-        const countRes = await fetch(`${dbURL}/totalCount.json`);
-        let currentCount = await countRes.json() || 0;
-        
-        // 3. Increment the count (PUT)
-        await fetch(`${dbURL}/totalCount.json`, {
-            method: 'PUT',
-            body: JSON.stringify(currentCount + 1)
-        });
+//         const visitData = {
+//             city: geoData.city || "Unknown",
+//             country: geoData.country_name || "Unknown",
+//             time: new Date().toLocaleString()
+//         };
 
-        // 4. Saving logs (POST)
-        await fetch(`${dbURL}/logs.json`, {
-            method: 'POST',
-            body: JSON.stringify(visitData)
-        });
+//         // 2. Reading the old count
+//         const countRes = await fetch(`${dbURL}/totalCount.json`);
+//         let currentCount = await countRes.json() || 0;
 
-    } catch (e) {
-        console.log("Tracking skip...");
-    }
-}
+//         // 3. Increment the count (PUT)
+//         await fetch(`${dbURL}/totalCount.json`, {
+//             method: 'PUT',
+//             body: JSON.stringify(currentCount + 1)
+//         });
 
-// Admin check (if the URL contains ?show=admin)
-const urlParams = new URLSearchParams(window.location.search);
-if (urlParams.get('show') === 'admin') {
-    showMyStats();
-}
+//         // 4. Saving logs (POST)
+//         await fetch(`${dbURL}/logs.json`, {
+//             method: 'POST',
+//             body: JSON.stringify(visitData)
+//         });
 
-async function showMyStats() {
-    const res = await fetch(`${dbURL}/.json`);
-    const data = await res.json();
-    
-    const div = document.createElement('div');
-    div.style = "position:fixed; top:10px; left:10px; background:rgba(0,0,0,0.9); color:#00ff00; padding:15px; border-radius:8px; z-index:9999; font-family:monospace; border:1px solid #00ff00; max-height:80vh; overflow-y:auto; width:250px;";
-    
-    div.innerHTML = `
-        <h3 style="margin:0 0 10px 0;">📊 Admin Panel</h3>
-        <p style="font-size:20px;">Visits: <b>${data.totalCount || 0}</b></p>
-        <hr style="border:0.5px solid #333;">
-        <p>Recent Logs:</p>
-        <div id="logs-list" style="font-size:11px;"></div>
-        <button onclick="this.parentElement.remove()" style="margin-top:10px; width:100%; cursor:pointer;">Close</button>
-    `;
-    
-    document.body.appendChild(div);
-    
-    if(data.logs) {
-        const logsDiv = document.getElementById('logs-list');
-        Object.values(data.logs).reverse().slice(0, 5).forEach(log => {
-            logsDiv.innerHTML += `<div>📍 ${log.city} (${log.time})</div><br>`;
-        });
-    }
-}
+//     } catch (e) {
+//         console.log("Tracking skip...");
+//     }
+// }
 
-trackVisitor();
+// // Admin check (if the URL contains ?show=admin)
+// const urlParams = new URLSearchParams(window.location.search);
+// if (urlParams.get('show') === 'admin') {
+//     showMyStats();
+// }
+
+// async function showMyStats() {
+//     const res = await fetch(`${dbURL}/.json`);
+//     const data = await res.json();
+
+//     const div = document.createElement('div');
+//     div.style = "position:fixed; top:10px; left:10px; background:rgba(0,0,0,0.9); color:#00ff00; padding:15px; border-radius:8px; z-index:9999; font-family:monospace; border:1px solid #00ff00; max-height:80vh; overflow-y:auto; width:250px;";
+
+//     div.innerHTML = `
+//         <h3 style="margin:0 0 10px 0;">📊 Admin Panel</h3>
+//         <p style="font-size:20px;">Visits: <b>${data.totalCount || 0}</b></p>
+//         <hr style="border:0.5px solid #333;">
+//         <p>Recent Logs:</p>
+//         <div id="logs-list" style="font-size:11px;"></div>
+//         <button onclick="this.parentElement.remove()" style="margin-top:10px; width:100%; cursor:pointer;">Close</button>
+//     `;
+
+//     document.body.appendChild(div);
+
+//     if(data.logs) {
+//         const logsDiv = document.getElementById('logs-list');
+//         Object.values(data.logs).reverse().slice(0, 5).forEach(log => {
+//             logsDiv.innerHTML += `<div>📍 ${log.city} (${log.time})</div><br>`;
+//         });
+//     }
+// }
+
+// trackVisitor();
 
 // for slider code
 
-$(document).ready(function() {
+$(document).ready(function () {
     $('.slider').slick({
         arrows: false,
         dots: true,
@@ -179,41 +179,41 @@ let contact = document.querySelector('a[href="#contact"]');
 hamberger.addEventListener('click', function () {
     mobileNav.classList.add('open');
 });
-times.addEventListener('click', function(){
+times.addEventListener('click', function () {
     mobileNav.classList.remove('open');
 });
-mobileNav.addEventListener('click', function(){
+mobileNav.addEventListener('click', function () {
     mobileNav.classList.remove('open');
 });
 
-about.addEventListener('click', function(){
+about.addEventListener('click', function () {
     mobileNav.classList.remove('open');
 })
 hamberger.addEventListener('click', function () {
     mobileNav.classList.add('open');
 });
 
-times.addEventListener('click', function(){
+times.addEventListener('click', function () {
     mobileNav.classList.remove('open');
 });
 
-about.addEventListener('click', function(){
+about.addEventListener('click', function () {
     mobileNav.classList.remove('open');
 });
 
-home.addEventListener('click', function(){
+home.addEventListener('click', function () {
     mobileNav.classList.remove('open');
 });
 
-skills.addEventListener('click', function(){
+skills.addEventListener('click', function () {
     mobileNav.classList.remove('open');
 });
 
-certificates.addEventListener('click', function(){
+certificates.addEventListener('click', function () {
     mobileNav.classList.remove('open');
 });
 
-projects.addEventListener('click', function(){
+projects.addEventListener('click', function () {
     mobileNav.classList.remove('open');
 });
 
@@ -230,33 +230,33 @@ let isDeleting = false;
 let typeSpeed = 200;
 
 function type() {
-  const currentWord = words[wordIndex];
-  
-  if (isDeleting) {
-    // remove letter
-    textElement.textContent = currentWord.substring(0, charIndex - 1);
-    charIndex--;
-    typeSpeed = 100; // Slight speed increase when deleting
-  } else {
-    // Add the Letter
-    textElement.textContent = currentWord.substring(0, charIndex + 1);
-    charIndex++;
-    typeSpeed = 200;
-  }
+    const currentWord = words[wordIndex];
 
-  // Logic: When the word is completely typed
-  if (!isDeleting && charIndex === currentWord.length) {
-    isDeleting = true;
-    typeSpeed = 1500; // Wait 1.5 seconds for the entire word to be written.
-  } 
-  // Logic: when the word is completely delete
-  else if (isDeleting && charIndex === 0) {
-    isDeleting = false;
-    wordIndex = (wordIndex + 1) % words.length; // Go to next word
-    typeSpeed = 500;
-  }
+    if (isDeleting) {
+        // remove letter
+        textElement.textContent = currentWord.substring(0, charIndex - 1);
+        charIndex--;
+        typeSpeed = 100; // Slight speed increase when deleting
+    } else {
+        // Add the Letter
+        textElement.textContent = currentWord.substring(0, charIndex + 1);
+        charIndex++;
+        typeSpeed = 200;
+    }
 
-  setTimeout(type, typeSpeed);
+    // Logic: When the word is completely typed
+    if (!isDeleting && charIndex === currentWord.length) {
+        isDeleting = true;
+        typeSpeed = 1500; // Wait 1.5 seconds for the entire word to be written.
+    }
+    // Logic: when the word is completely delete
+    else if (isDeleting && charIndex === 0) {
+        isDeleting = false;
+        wordIndex = (wordIndex + 1) % words.length; // Go to next word
+        typeSpeed = 500;
+    }
+
+    setTimeout(type, typeSpeed);
 }
 
 // for start
