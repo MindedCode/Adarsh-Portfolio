@@ -115,6 +115,95 @@ header nav h1 span {
     border-radius: 25px;
 }
 
+/* --- Professional Animation Engine --- */
+
+/* 1. The container is given a mix of 'Inline' and 'Absolute' so that the text doesn't move */
+.kzr-double-wave-container {
+    position: relative;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+    /* Professional movement: no jerks, very smooth */
+    animation: profMoveAndZoom 15s ease-in-out infinite;
+    /* Max-width to keep responsive */
+    max-width: 100%;
+    margin: 20px;
+}
+
+/* 2. Your original image - we've kept this 'Static' so the text stays around it */
+.my-hero-img {
+    position: relative;
+    z-index: 10;
+    width: 260px; /* shortened slightly to make the text fit */
+    height: auto;
+    display: block;
+    border-radius: 10px; /* If your old CSS has radius, this will support it */
+}
+
+/* 3. outer border 1 (Smooth Wave) */
+.kzr-double-wave-container::before {
+    content: "";
+    position: absolute;
+    width: 115%; /* Proportional to the image */
+    height: 110%;
+    border: 2px solid rgba(138, 116, 243, 0.5);
+    border-radius: 45% 55% 50% 50% / 50% 50% 55% 45%;
+    z-index: -1;
+    animation: waveRotation 10s linear infinite;
+    pointer-events: none; /* So that mouse clicks are not obstructed */
+}
+
+/* 4. outer border 2 (Outer Glow) */
+.kzr-double-wave-container::after {
+    content: "";
+    position: absolute;
+    width: 125%;
+    height: 120%;
+    border: 1px solid rgba(106, 90, 205, 0.2);
+    border-radius: 50%;
+    z-index: -2;
+    animation: waveRotation 18s linear infinite reverse;
+    filter: blur(4px);
+    pointer-events: none;
+}
+
+/* --- Professional Animations --- */
+
+/*We've set the 'Translate' value to low to avoid distorting the text.*/
+@keyframes profMoveAndZoom {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(8px, -8px) scale(1.03); } 
+    50% { transform: translate(-5px, 5px) scale(0.98); } 
+    75% { transform: translate(-8px, -5px) scale(1.03); }
+}
+
+/* Smooth rotation of borders */
+@keyframes waveRotation {
+    0% { 
+        transform: rotate(0deg); 
+        border-radius: 45% 55% 50% 50% / 50% 50% 55% 45%;
+    }
+    50% { 
+        border-radius: 52% 48% 55% 45% / 45% 55% 48% 52%; 
+        box-shadow: 0 0 30px rgba(138, 116, 243, 0.3);
+    }
+    100% { 
+        transform: rotate(360deg); 
+        border-radius: 45% 55% 50% 50% / 50% 50% 55% 45%;
+    }
+}
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 768px) {
+    .my-hero-img {
+        width: 200px; /*Smaller image on mobile so text doesn't collapse*/
+    }
+    .kzr-double-wave-container {
+        margin: 10px;
+    }
+}
+
 .hero .right {
     color: var(--pure);
     margin-top: -8rem;
@@ -980,6 +1069,7 @@ blink {
 
     .hero .right {
         position: absolute;
+        z-index: 1;
         right: 2%;
         top: 5.8%;
         left: 2%;
