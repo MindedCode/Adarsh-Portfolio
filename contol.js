@@ -67,7 +67,7 @@ async function showProfessionalPanel() {
             #system-admin-panel button { width:150px; padding:10px; border:none; border-radius:6px; cursor:pointer; font-weight:bold; color:white; }
         </style>
         <div style="max-width:900px; margin:auto;">
-            <h2 style="text-align:center; color:#58a6ff; margin-bottom:20px;">System Admin Dashboard</h2>
+            <h2 style="text-align:center; color:#58a6ff; margin-bottom:20px;">System Admin Dashboard1</h2>
             <div class="btn-grp">
                 <button style="background:#238636;" onclick="location.reload()">REFRESH</button>
                 <button style="background:#da3633;" onclick="document.getElementById('system-admin-panel').remove()">CLOSE</button>
