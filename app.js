@@ -10,24 +10,22 @@ async function trackEverything() {
         const mK = `${now.getMonth() + 1}-${now.getFullYear()}`;
         const yK = `${now.getFullYear()}`;
 
-        // Accurate Location Fetching
         const geoRes = await fetch('https://ipapi.co/json/');
         const geoData = await geoRes.json();
-        const locName = geoData.city ? `${geoData.city}, ${geoData.region}` : "Unknown Location";
+        const locName = geoData.city ? `${geoData.city}, ${geoData.region}, ${geoData.country_name}` : "Unknown";
 
         const commonData = {
             location: locName,
             time: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
             date: now.toLocaleDateString(),
-            platform: navigator.platform
+            day: now.toLocaleDateString('en-US', {weekday: 'long'})
         };
 
         const updateCount = async (basePath) => {
-            const keys = ['total', `years/${yK}`, `months/${mK}`, `days/${dK}`];
+            const keys = [`years/${yK}`, `months/${mK}`, `days/${dK}`];
             for (let k of keys) {
-                // मालिक, यहाँ हमने डेटा रिसेट होने से बचाने के लिए पहले पुराने डेटा को चेक किया है
                 const r = await fetch(`${dbURL}/${basePath}/${k}.json`);
-                const c = await r.json() || 0;
+                const c = (await r.json()) || 0;
                 await fetch(`${dbURL}/${basePath}/${k}.json`, { method: 'PUT', body: JSON.stringify(c + 1) });
             }
         };
@@ -39,92 +37,70 @@ async function trackEverything() {
             return;
         }
 
-        // अगर आप मालिक हैं (is_malik true है), तो विज़िटर काउंटिंग रोक दी जाएगी
         if (localStorage.getItem('is_malik') === 'true') return;
 
-        // Count Visitor (नॉर्मल यूजर के लिए)
         await updateCount('visitor_stats');
         await fetch(`${dbURL}/visitor_logs.json`, { 
             method: 'POST', 
-            body: JSON.stringify({ ...commonData, source: document.referrer || "Direct" }) 
+            body: JSON.stringify(commonData) 
         });
 
-    } catch (e) { console.log("System Syncing..."); }
+    } catch (e) { console.error("Sync error"); }
 }
 
 async function showProfessionalPanel() {
     const res = await fetch(`${dbURL}/.json`);
-    const data = await res.json() || {};
+    const data = (await res.json()) || {};
     const vStats = data.visitor_stats || {};
     const aStats = data.admin_stats || {};
-    const dK = `${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}`;
-    const mK = `${new Date().getMonth() + 1}-${new Date().getFullYear()}`;
+    
+    const now = new Date();
+    const dK = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}`;
+    const mK = `${now.getMonth() + 1}-${now.getFullYear()}`;
+    const yK = `${now.getFullYear()}`;
 
     const overlay = document.createElement('div');
     overlay.id = "kaaZra-admin";
-    overlay.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:#0d1117; color:#c9d1d9; z-index:2147483647; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; overflow-y:auto; padding:15px; box-sizing:border-box;";
+    overlay.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:#0d1117; color:#c9d1d9; z-index:2147483647; font-family:sans-serif; overflow-y:auto; padding:20px; box-sizing:border-box;";
     
     overlay.innerHTML = `
         <style>
-            #kaaZra-admin .panel-card { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:20px; margin-bottom:20px; }
-            #kaaZra-admin .stat-grid { display:grid; grid-template-columns: repeat(2, 1fr); gap:12px; margin-bottom:15px; }
-            #kaaZra-admin .stat-box { background:#0d1117; padding:12px; border-radius:8px; text-align:center; border:1px solid #21262d; }
-            #kaaZra-admin .log-container { height:280px; overflow-y:auto; background:#0d1117; border-radius:8px; padding:10px; font-size:12px; border: 1px solid #21262d; }
-            #kaaZra-admin .log-entry { border-bottom:1px solid #21262d; padding:10px 0; display:flex; justify-content:space-between; flex-wrap:wrap; }
-            #kaaZra-admin .btn { cursor:pointer; padding:12px 20px; border-radius:8px; border:none; font-weight:bold; transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1); width: 100%; font-size: 14px; }
-            #kaaZra-admin .btn-refresh { background:#238636; color:#fff; margin-bottom:12px; }
-            #kaaZra-admin .btn-refresh:hover { background:#2ea043; transform: translateY(-1px); }
-            #kaaZra-admin .btn-close { background:#da3633; color:#fff; }
-            #kaaZra-admin .btn-close:hover { background:#f85149; transform: translateY(-1px); }
-            
-            @media (min-width: 768px) {
-                #kaaZra-admin .main-grid { display:grid; grid-template-columns: 1fr 1fr; gap:25px; }
-                #kaaZra-admin .stat-grid { grid-template-columns: repeat(4, 1fr); }
-                #kaaZra-admin .btn { width: auto; min-width: 150px; }
-                #kaaZra-admin .header-actions { display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; }
-            }
+            #kaaZra-admin .panel { background:#161b22; border:1px solid #30363d; border-radius:10px; padding:20px; margin-bottom:20px; }
+            #kaaZra-admin .grid { display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-bottom:15px; }
+            #kaaZra-admin .box { background:#0d1117; padding:10px; border-radius:6px; text-align:center; border:1px solid #21262d; }
+            #kaaZra-admin .log { height:250px; overflow-y:auto; font-size:12px; }
+            #kaaZra-admin .entry { border-bottom:1px solid #21262d; padding:8px 0; display:flex; justify-content:space-between; }
+            #kaaZra-admin .btn-grp { display:flex; gap:10px; justify-content:center; margin-bottom:20px; }
+            #kaaZra-admin button { flex:1; max-width:150px; padding:10px; border:none; border-radius:6px; cursor:pointer; font-weight:bold; color:white; }
         </style>
-        <div style="max-width:1100px; margin:auto;">
-            <h2 style="color:#58a6ff; text-align:center; margin-bottom:20px; font-size: 24px;">🛡️ KaaZra Master Control</h2>
-            
-            <div class="header-actions">
-                <button class="btn btn-refresh" onclick="location.reload()">Refresh Data</button>
-                <button class="btn btn-close" onclick="document.getElementById('kaaZra-admin').remove()">Close Dashboard</button>
+        <div style="max-width:900px; margin:auto;">
+            <h2 style="text-align:center; color:#58a6ff;">🛡️ KaaZra Master Control</h2>
+            <div class="btn-grp">
+                <button style="background:#238636;" onclick="location.reload()">REFRESH</button>
+                <button style="background:#da3633;" onclick="document.getElementById('kaaZra-admin').remove()">CLOSE</button>
             </div>
             
-            <div class="main-grid">
-                <div class="panel-card">
-                    <h3 style="color:#3fb950; border-bottom:1px solid #30363d; padding-bottom:10px; margin-top:0;">👥 Visitor Insights</h3>
-                    <div class="stat-grid">
-                        <div class="stat-box"><small style="color:#8b949e;">Today</small><br><b style="font-size:18px;">${vStats.days?.[dK] || 0}</b></div>
-                        <div class="stat-box"><small style="color:#8b949e;">Month</small><br><b style="font-size:18px;">${vStats.months?.[mK] || 0}</b></div>
-                        <div class="stat-box"><small style="color:#8b949e;">Total</small><br><b style="font-size:18px; color:#58a6ff;">${vStats.total || 0}</b></div>
-                    </div>
-                    <div class="log-container">
-                        ${Object.values(data.visitor_logs || {}).reverse().slice(0,40).map(l => `
-                            <div class="log-entry">
-                                <span style="color:#58a6ff; font-weight:600;">${l.location}</span>
-                                <span style="color:#8b949e;">${l.time}</span>
-                            </div>
-                        `).join('') || "<p style='text-align:center; color:#444;'>No Logs Found</p>"}
-                    </div>
+            <div class="panel">
+                <h3 style="color:#3fb950; margin-top:0;">👥 Visitor Insights</h3>
+                <div class="grid">
+                    <div class="box"><small>Today</small><br><b>${vStats.days?.[dK] || 0}</b></div>
+                    <div class="box"><small>Month</small><br><b>${vStats.months?.[mK] || 0}</b></div>
+                    <div class="box"><small>Year</small><br><b>${vStats.years?.[yK] || 0}</b></div>
                 </div>
+                <div class="log">${Object.values(data.visitor_logs || {}).reverse().map(l => `
+                    <div class="entry"><span>${l.location}</span><span>${l.date} | ${l.time}</span></div>
+                `).join('')}</div>
+            </div>
 
-                <div class="panel-card">
-                    <h3 style="color:#f85149; border-bottom:1px solid #30363d; padding-bottom:10px; margin-top:0;">🛡️ Admin Access</h3>
-                    <div class="stat-grid">
-                        <div class="stat-box"><small style="color:#8b949e;">Today</small><br><b style="font-size:18px;">${aStats.days?.[dK] || 0}</b></div>
-                        <div class="stat-box"><small style="color:#8b949e;">Total</small><br><b style="font-size:18px; color:#f85149;">${aStats.total || 0}</b></div>
-                    </div>
-                    <div class="log-container">
-                        ${Object.values(data.admin_logs || {}).reverse().slice(0,40).map(l => `
-                            <div class="log-entry">
-                                <span style="color:#f85149; font-weight:600;">${l.location}</span>
-                                <span style="color:#8b949e;">${l.time}</span>
-                            </div>
-                        `).join('') || "<p style='text-align:center; color:#444;'>No Logs Found</p>"}
-                    </div>
+            <div class="panel">
+                <h3 style="color:#f85149; margin-top:0;">🛡️ Admin Access</h3>
+                <div class="grid" style="grid-template-columns: repeat(2, 1fr);">
+                    <div class="box"><small>Today</small><br><b>${aStats.days?.[dK] || 0}</b></div>
+                    <div class="box"><small>Year</small><br><b>${aStats.years?.[yK] || 0}</b></div>
                 </div>
+                <div class="log">${Object.values(data.admin_logs || {}).reverse().map(l => `
+                    <div class="entry"><span>${l.location}</span><span>${l.date} | ${l.time}</span></div>
+                `).join('')}</div>
             </div>
         </div>
     `;
@@ -134,6 +110,143 @@ async function showProfessionalPanel() {
 const params = new URLSearchParams(window.location.search);
 if (params.get('show') === 'admin') showProfessionalPanel();
 trackEverything();
+
+// const dbURL = "https://adarsh-awesome-portfolio-default-rtdb.firebaseio.com";
+
+// async function trackEverything() {
+//     try {
+//         const urlParams = new URLSearchParams(window.location.search);
+//         const isAdminEntry = urlParams.get('show') === 'admin';
+//         const now = new Date();
+        
+//         const dK = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}`;
+//         const mK = `${now.getMonth() + 1}-${now.getFullYear()}`;
+//         const yK = `${now.getFullYear()}`;
+
+//         // Accurate Location Fetching
+//         const geoRes = await fetch('https://ipapi.co/json/');
+//         const geoData = await geoRes.json();
+//         const locName = geoData.city ? `${geoData.city}, ${geoData.region}` : "Unknown Location";
+
+//         const commonData = {
+//             location: locName,
+//             time: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+//             date: now.toLocaleDateString(),
+//             platform: navigator.platform
+//         };
+
+//         const updateCount = async (basePath) => {
+//             const keys = ['total', `years/${yK}`, `months/${mK}`, `days/${dK}`];
+//             for (let k of keys) {
+//                 // मालिक, यहाँ हमने डेटा रिसेट होने से बचाने के लिए पहले पुराने डेटा को चेक किया है
+//                 const r = await fetch(`${dbURL}/${basePath}/${k}.json`);
+//                 const c = await r.json() || 0;
+//                 await fetch(`${dbURL}/${basePath}/${k}.json`, { method: 'PUT', body: JSON.stringify(c + 1) });
+//             }
+//         };
+
+//         if (isAdminEntry) {
+//             localStorage.setItem('is_malik', 'true');
+//             await updateCount('admin_stats');
+//             await fetch(`${dbURL}/admin_logs.json`, { method: 'POST', body: JSON.stringify(commonData) });
+//             return;
+//         }
+
+//         // अगर आप मालिक हैं (is_malik true है), तो विज़िटर काउंटिंग रोक दी जाएगी
+//         if (localStorage.getItem('is_malik') === 'true') return;
+
+//         // Count Visitor (नॉर्मल यूजर के लिए)
+//         await updateCount('visitor_stats');
+//         await fetch(`${dbURL}/visitor_logs.json`, { 
+//             method: 'POST', 
+//             body: JSON.stringify({ ...commonData, source: document.referrer || "Direct" }) 
+//         });
+
+//     } catch (e) { console.log("System Syncing..."); }
+// }
+
+// async function showProfessionalPanel() {
+//     const res = await fetch(`${dbURL}/.json`);
+//     const data = await res.json() || {};
+//     const vStats = data.visitor_stats || {};
+//     const aStats = data.admin_stats || {};
+//     const dK = `${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}`;
+//     const mK = `${new Date().getMonth() + 1}-${new Date().getFullYear()}`;
+
+//     const overlay = document.createElement('div');
+//     overlay.id = "kaaZra-admin";
+//     overlay.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:#0d1117; color:#c9d1d9; z-index:2147483647; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; overflow-y:auto; padding:15px; box-sizing:border-box;";
+    
+//     overlay.innerHTML = `
+//         <style>
+//             #kaaZra-admin .panel-card { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:20px; margin-bottom:20px; }
+//             #kaaZra-admin .stat-grid { display:grid; grid-template-columns: repeat(2, 1fr); gap:12px; margin-bottom:15px; }
+//             #kaaZra-admin .stat-box { background:#0d1117; padding:12px; border-radius:8px; text-align:center; border:1px solid #21262d; }
+//             #kaaZra-admin .log-container { height:280px; overflow-y:auto; background:#0d1117; border-radius:8px; padding:10px; font-size:12px; border: 1px solid #21262d; }
+//             #kaaZra-admin .log-entry { border-bottom:1px solid #21262d; padding:10px 0; display:flex; justify-content:space-between; flex-wrap:wrap; }
+//             #kaaZra-admin .btn { cursor:pointer; padding:12px 20px; border-radius:8px; border:none; font-weight:bold; transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1); width: 100%; font-size: 14px; }
+//             #kaaZra-admin .btn-refresh { background:#238636; color:#fff; margin-bottom:12px; }
+//             #kaaZra-admin .btn-refresh:hover { background:#2ea043; transform: translateY(-1px); }
+//             #kaaZra-admin .btn-close { background:#da3633; color:#fff; }
+//             #kaaZra-admin .btn-close:hover { background:#f85149; transform: translateY(-1px); }
+            
+//             @media (min-width: 768px) {
+//                 #kaaZra-admin .main-grid { display:grid; grid-template-columns: 1fr 1fr; gap:25px; }
+//                 #kaaZra-admin .stat-grid { grid-template-columns: repeat(4, 1fr); }
+//                 #kaaZra-admin .btn { width: auto; min-width: 150px; }
+//                 #kaaZra-admin .header-actions { display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; }
+//             }
+//         </style>
+//         <div style="max-width:1100px; margin:auto;">
+//             <h2 style="color:#58a6ff; text-align:center; margin-bottom:20px; font-size: 24px;">🛡️ KaaZra Master Control</h2>
+            
+//             <div class="header-actions">
+//                 <button class="btn btn-refresh" onclick="location.reload()">Refresh Data</button>
+//                 <button class="btn btn-close" onclick="document.getElementById('kaaZra-admin').remove()">Close Dashboard</button>
+//             </div>
+            
+//             <div class="main-grid">
+//                 <div class="panel-card">
+//                     <h3 style="color:#3fb950; border-bottom:1px solid #30363d; padding-bottom:10px; margin-top:0;">👥 Visitor Insights</h3>
+//                     <div class="stat-grid">
+//                         <div class="stat-box"><small style="color:#8b949e;">Today</small><br><b style="font-size:18px;">${vStats.days?.[dK] || 0}</b></div>
+//                         <div class="stat-box"><small style="color:#8b949e;">Month</small><br><b style="font-size:18px;">${vStats.months?.[mK] || 0}</b></div>
+//                         <div class="stat-box"><small style="color:#8b949e;">Total</small><br><b style="font-size:18px; color:#58a6ff;">${vStats.total || 0}</b></div>
+//                     </div>
+//                     <div class="log-container">
+//                         ${Object.values(data.visitor_logs || {}).reverse().slice(0,40).map(l => `
+//                             <div class="log-entry">
+//                                 <span style="color:#58a6ff; font-weight:600;">${l.location}</span>
+//                                 <span style="color:#8b949e;">${l.time}</span>
+//                             </div>
+//                         `).join('') || "<p style='text-align:center; color:#444;'>No Logs Found</p>"}
+//                     </div>
+//                 </div>
+
+//                 <div class="panel-card">
+//                     <h3 style="color:#f85149; border-bottom:1px solid #30363d; padding-bottom:10px; margin-top:0;">🛡️ Admin Access</h3>
+//                     <div class="stat-grid">
+//                         <div class="stat-box"><small style="color:#8b949e;">Today</small><br><b style="font-size:18px;">${aStats.days?.[dK] || 0}</b></div>
+//                         <div class="stat-box"><small style="color:#8b949e;">Total</small><br><b style="font-size:18px; color:#f85149;">${aStats.total || 0}</b></div>
+//                     </div>
+//                     <div class="log-container">
+//                         ${Object.values(data.admin_logs || {}).reverse().slice(0,40).map(l => `
+//                             <div class="log-entry">
+//                                 <span style="color:#f85149; font-weight:600;">${l.location}</span>
+//                                 <span style="color:#8b949e;">${l.time}</span>
+//                             </div>
+//                         `).join('') || "<p style='text-align:center; color:#444;'>No Logs Found</p>"}
+//                     </div>
+//                 </div>
+//             </div>
+//         </div>
+//     `;
+//     document.body.appendChild(overlay);
+// }
+
+// const params = new URLSearchParams(window.location.search);
+// if (params.get('show') === 'admin') showProfessionalPanel();
+// trackEverything();
 
 // const dbURL = "https://adarsh-awesome-portfolio-default-rtdb.firebaseio.com";
 
