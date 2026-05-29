@@ -683,160 +683,15 @@
 // perfect -------------------------------------------------
 // --------------------------------------------------------------------------------------------------------
 
-// const dbURL = "https://adarsh-awesome-portfolio-default-rtdb.firebaseio.com";
-
-// // 1. ट्रैकिंग लॉजिक (IP, Date, Time, Unique ID)
-// async function trackAndLog() {
-//     try {
-//         const now = new Date();
-//         // Day Name, Date, Time formatting
-//         const options = { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric' };
-//         const fullDate = now.toLocaleDateString('en-IN', options); // e.g. "Wednesday, 27-05-2026"
-//         const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-//         let loc = "Tracking Blocked";
-//         try {
-//             const geoRes = await fetch('https://ip-api.com/json/');
-//             const geoData = await geoRes.json();
-//             if(geoData.status === 'success') {
-//                 loc = `${geoData.city}, ${geoData.countryCode}`;
-//             }
-//         } catch(e) { loc = "VPN/Ad-Blocker Active"; }
-
-//         // Unique Visitor ID generator (Fixing "Unknown" name)
-//         const visitorID = "Visitor #" + Math.floor(1000 + Math.random() * 9000);
-
-//         const logEntry = {
-//             name: visitorID,
-//             location: loc,
-//             time: time,
-//             date: fullDate
-//         };
-
-//         const isAdmin = new URLSearchParams(window.location.search).get('show') === 'admin';
-//         const logPath = isAdmin ? 'v2_admin_logs' : 'v2_visitor_logs';
-
-//         await fetch(`${dbURL}/${logPath}.json`, { 
-//             method: 'POST', 
-//             body: JSON.stringify(logEntry) 
-//         });
-
-//     } catch (e) { console.error("Tracking Error:", e); }
-// }
-
-// // 2. प्रोफेशनल डैशबोर्ड UI (Thunderstorm + Scrollbar Fix)
-// async function showProfessionalPanel() {
-//     const res = await fetch(`${dbURL}/.json`);
-//     const data = (await res.json()) || {};
-//     const vStats = data.v2_visitor_stats || {};
-//     const aStats = data.v2_admin_stats || {};
-//     const vLogs = Object.values(data.v2_visitor_logs || {}).reverse();
-
-//     window.renderDashboard = (viewType = 'main', title = '', stats = {}) => {
-//         const container = document.getElementById('panel-content');
-//         if (viewType === 'main') {
-//             container.innerHTML = `
-//                 <div class="stats-grid">
-//                     <div class="card" onclick="renderDashboard('detail', 'Admin Access', ${JSON.stringify(aStats).replace(/"/g, "'")})">
-//                         <small>ADMIN ACCESS</small>
-//                         <div class="value">${Object.values(aStats.years || {}).reduce((a,b)=>a+b, 0)}</div>
-//                     </div>
-//                     <div class="card" onclick="renderDashboard('detail', 'Visitors', ${JSON.stringify(vStats).replace(/"/g, "'")})">
-//                         <small>TOTAL VISITORS</small>
-//                         <div class="value">${Object.values(vStats.years || {}).reduce((a,b)=>a+b, 0)}</div>
-//                     </div>
-//                 </div>
-//                 <div style="margin-top:20px; background:#1c2128; padding:15px; border-radius:12px; border:1px solid #30363d;">
-//                     <h3>Recent Activity</h3>
-//                     <div class="log-box">
-//                         ${vLogs.map(l => `
-//                             <div class="stat-row">
-//                                 <span><b>${l.name}</b> - ${l.location}</span> 
-//                                 <span style="white-space:nowrap; margin-left:10px;">${l.date} | ${l.time}</span>
-//                             </div>
-//                         `).join('')}
-//                     </div>
-//                 </div>
-//             `;
-//         } else {
-//             container.innerHTML = `
-//                 <button class="back-btn" onclick="renderDashboard()">← Back to Overview</button>
-//                 <div class="detail-card">
-//                     <h3>${title} Stats</h3>
-//                     <div class="stat-row"><span>Yearly Total</span> <b>${stats.years ? Object.values(stats.years)[0] : 0}</b></div>
-//                     <div class="stat-row"><span>Monthly Total</span> <b>${stats.months ? Object.values(stats.months)[0] : 0}</b></div>
-//                 </div>
-//             `;
-//         }
-//     };
-
-//     const overlay = document.createElement('div');
-//     overlay.id = "system-admin-panel";
-//     overlay.innerHTML = `
-//         <style>
-//             @keyframes ghost-lightning { 
-//                 0%, 95% { background: rgba(10, 15, 20, 0.95); box-shadow: inset 0 0 100px #000; }
-//                 96% { background: #fff; box-shadow: inset 0 0 100px #fff; }
-//                 97% { background: rgba(10, 15, 20, 0.95); }
-//                 98% { background: #fff; box-shadow: inset 0 0 100px #fff; }
-//                 100% { background: rgba(10, 15, 20, 0.95); }
-//             }
-//             #system-admin-panel { position:fixed; top:0; left:0; width:100%; height:100%; z-index:99999; animation: ghost-lightning 5s infinite; font-family: 'Segoe UI', sans-serif; padding:40px; box-sizing:border-box; color:#e6edf3; }
-//             .stats-grid { display:grid; grid-template-columns: 1fr 1fr; gap:20px; }
-//             .card { background:#1c2128; padding:25px; border-radius:12px; border:1px solid #30363d; cursor:pointer; text-align:center; transition:0.3s; }
-//             .card:hover { background:#222a33; border-color:#58a6ff; transform:translateY(-5px); }
-//             .value { font-size: 2em; font-weight: bold; margin-top: 10px; color: #58a6ff; }
-//             .back-btn { background:transparent; border:1px solid #30363d; color:#8b949e; padding:8px 15px; border-radius:6px; cursor:pointer; margin-bottom:15px; }
-            
-//             /* SCROLLBAR FIX */
-//             .log-box { 
-//                 height:200px; 
-//                 overflow-y:auto; 
-//                 padding-right: 20px; /* scrollbar overlap fix */
-//             }
-//             .stat-row { 
-//                 display:flex; 
-//                 justify-content:space-between; 
-//                 padding:12px 0; 
-//                 border-bottom:1px solid #30363d; 
-//             }
-//         </style>
-//         <div style="max-width:700px; margin:auto;">
-//             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
-//                 <h2 style="margin:0;">⚡ Analytics Control</h2>
-//                 <button onclick="document.getElementById('system-admin-panel').remove()" style="background:#da3633; border:none; color:white; padding:8px 15px; border-radius:6px; cursor:pointer;">Close</button>
-//             </div>
-//             <div id="panel-content"></div>
-//         </div>
-//     `;
-//     document.body.appendChild(overlay);
-//     window.renderDashboard();
-// }
-
-// // System Execution
-// trackAndLog();
-// if (new URLSearchParams(window.location.search).get('show') === 'admin') {
-//     showProfessionalPanel();
-// }
-
-
-// ............................................................===============================================
-
 const dbURL = "https://adarsh-awesome-portfolio-default-rtdb.firebaseio.com";
 
-// 1. ट्रैकिंग लॉजिक (Manual Day Logic + Unique ID)
+// 1. ट्रैकिंग लॉजिक (IP, Date, Time, Unique ID)
 async function trackAndLog() {
     try {
         const now = new Date();
-        
-        // Day Name Manual Logic - 100% Work Karega
-        const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-        const dayName = days[now.getDay()];
-        const day = String(now.getDate()).padStart(2, '0');
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const year = now.getFullYear();
-        const fullDate = `${dayName}, ${day}-${month}-${year}`;
-        
+        // Day Name, Date, Time formatting
+        const options = { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric' };
+        const fullDate = now.toLocaleDateString('en-IN', options); // e.g. "Wednesday, 27-05-2026"
         const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
         let loc = "Tracking Blocked";
@@ -846,8 +701,9 @@ async function trackAndLog() {
             if(geoData.status === 'success') {
                 loc = `${geoData.city}, ${geoData.countryCode}`;
             }
-        } catch(e) { loc = "VPN Active"; }
+        } catch(e) { loc = "VPN/Ad-Blocker Active"; }
 
+        // Unique Visitor ID generator (Fixing "Unknown" name)
         const visitorID = "Visitor #" + Math.floor(1000 + Math.random() * 9000);
 
         const logEntry = {
@@ -868,7 +724,7 @@ async function trackAndLog() {
     } catch (e) { console.error("Tracking Error:", e); }
 }
 
-// 2. प्रोफेशनल UI + Bhutiya Thunderstorm Magic
+// 2. प्रोफेशनल डैशबोर्ड UI (Thunderstorm + Scrollbar Fix)
 async function showProfessionalPanel() {
     const res = await fetch(`${dbURL}/.json`);
     const data = (await res.json()) || {};
@@ -895,7 +751,7 @@ async function showProfessionalPanel() {
                     <div class="log-box">
                         ${vLogs.map(l => `
                             <div class="stat-row">
-                                <span><b>${l.name || 'Visitor'}</b> (${l.location})</span> 
+                                <span><b>${l.name}</b> - ${l.location}</span> 
                                 <span style="white-space:nowrap; margin-left:10px;">${l.date} | ${l.time}</span>
                             </div>
                         `).join('')}
@@ -932,12 +788,11 @@ async function showProfessionalPanel() {
             .value { font-size: 2em; font-weight: bold; margin-top: 10px; color: #58a6ff; }
             .back-btn { background:transparent; border:1px solid #30363d; color:#8b949e; padding:8px 15px; border-radius:6px; cursor:pointer; margin-bottom:15px; }
             
-            /* SCROLLBAR & OVERLAP FIX */
+            /* SCROLLBAR FIX */
             .log-box { 
                 height:200px; 
                 overflow-y:auto; 
-                padding-right: 20px;
-                scrollbar-width: thin;
+                padding-right: 20px; /* scrollbar overlap fix */
             }
             .stat-row { 
                 display:flex; 
@@ -963,3 +818,7 @@ trackAndLog();
 if (new URLSearchParams(window.location.search).get('show') === 'admin') {
     showProfessionalPanel();
 }
+
+
+// ............................................................===============================================
+
