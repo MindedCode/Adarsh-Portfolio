@@ -159,13 +159,13 @@ header nav h1 span {
     z-index: 1;
     pointer-events: none;
 
-     /* Semi-transparent border and background */
-  /* border: 2px solid rgba(255, 255, 255, 0.3); */
-  background: rgba(255, 255, 255, 0.9);
-  filter: blur(1px);
-  
-  /* The Magic: Blurs everything behind the container */
-  /* backdrop-filter: blur(10px);
+    /* Semi-transparent border and background */
+    /* border: 2px solid rgba(255, 255, 255, 0.3); */
+    background: rgba(255, 255, 255, 0.7);
+    filter: blur(1px);
+
+    /* The Magic: Blurs everything behind the container */
+    /* backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);  */
 
 
@@ -669,41 +669,28 @@ footer h1 {
     padding-bottom: 2rem;
 }
 
-footer .footer-social a {
-    color: var(--light);
-    /* text-decoration: none; */
-    height: 40px;
-    width: 40px;
-    background-color: var(--secondary);
-    border-radius: 50%;
-    -webkit-border-radius: 50%;
-    -moz-border-radius: 50%;
-    -ms-border-radius: 50%;
-    -o-border-radius: 50%;
-    margin-right: 0.6rem;
-    transition: all .3s ease;
-    -webkit-transition: all .3s ease;
-    -moz-transition: all .3s ease;
-    -ms-transition: all .3s ease;
-    -o-transition: all .3s ease;
+.total-visit {
+    border-radius: 10px;
+    height: 25px;
+    border: 2px solid black;
 }
 
-.fa {
+/* =========================================================================================== */
+/* Container CSS */
+.social-links {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
     padding: 20px;
-    font-size: 25px;
-    width: 50px;
-    text-align: center;
-    text-decoration: none;
-    margin: 5px 2px;
-    padding-top: 8px;
-    padding-left: 11px;
 }
 
-footer .footer-social a:hover {
-    color: var(--primary);
-    height: 40.2px;
-    width: 40.2px;
+/* Individual Icon Buttons */
+.icon-btn {
+    width: 43px;
+    height: 43px;
     border-radius: 50%;
+    border: 1px solid #fff;
     -webkit-border-radius: 50%;
     -moz-border-radius: 50%;
     -ms-border-radius: 50%;
@@ -714,7 +701,37 @@ footer .footer-social a:hover {
     -moz-transition: all .3s ease;
     -ms-transition: all .3s ease;
     -o-transition: all .3s ease;
+    background: #000;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 25px;
+    /* box-shadow: 0 0 12px #cc00ff; Constant Cyan Glow */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+
+/* Middle/Center Highlight */
+.icon-btn.github {
+    border-color: #ffffff;
+    /* color: #00ffff; */
+    /* box-shadow: 0 0 18px #00ffff; */
+    box-shadow: rgb(0, 247, 255) 0px 0px 10px, rgb(0, 247, 255) 0px 0px 38px;
+    font-size: 25px;
+}
+
+/* Hover Effect */
+.icon-btn:hover {
+    transform: scale(1.15);
+    /* Zoom Effect */
+    box-shadow: 0 0 22px #ff00d0;
+    box-shadow: 0 0 10px #00f7ff, 0 0 12px #00f7ff;
+    /* border: 2px solid #fff; */
+
+}
+
+
 
 footer .copyright {
     margin-top: 3rem;
@@ -940,7 +957,8 @@ blink {
     }
 
     .wave-container::before {
-        inset: 78px -35px 84px -38px;;
+        inset: 78px -35px 84px -38px;
+        ;
     }
 
     .hero .right {
@@ -1110,10 +1128,11 @@ blink {
         padding-top: 1rem;
     }
 
-    .wave-container{
+    .wave-container {
         /* inset: 107px 32px 142px -38px; */
     }
-    .wave-container::before{
+
+    .wave-container::before {
         /* background: linear-gradient(rgba(255, 255, 255, 1) 0%, rgba(0, 0, 0, 1) 100%); */
     }
 
