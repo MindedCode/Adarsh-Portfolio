@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <style>
+        body {
+            background-color: #161616;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .wave-container {
+            margin: 0 auto;
+            padding-top: 117px;
+            position: relative;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            top: 200px;
+        }
+
+        .img-container {
+            width: 400px background-color: #161616;
+            /* display: flex; */
+            justify-content: center;
+            /* align-items: center; */
+            /* min-height: 100vh; */
+        }
+
+        .wave-container img {
+            position: relative;
+            z-index: 2;
+            top: -138px;
+            width: 450px;
+            height: 450px;
+            border-radius: 12;
+            /* object-fit: cover; */
+        }
+
+        .wave-container::before {
+            content: '';
+            position: absolute;
+            inset: -12px;
+            border: 3px solid #00d2d3;
+            border-radius: 48% 52% 56% 44% / 44% 54% 46% 56%;
+            box-shadow: 0 0 12px rgba(0, 210, 211, 0.6);
+            animation: waveRotate 10s ease-in-out infinite alternate;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .wave-container::after {
+            content: '';
+            position: absolute;
+            inset: -24px;
+            border: 2px solid #54a0ff;
+            border-radius: 54% 46% 44% 56% / 52% 44% 56% 48%;
+            box-shadow: 0 0 15px rgba(84, 160, 255, 0.5);
+            animation: waveRotate 14s ease-in-out infinite alternate-reverse;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        @keyframes waveRotate {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wave-container">
+        <div class="img-container">
+            <img src="./img/man.webp" alt="Wave Profile">
+        </div>
+    </div>
+
+</body>
+
+</html>
