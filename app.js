@@ -1667,13 +1667,25 @@
 // for slider code
 
 $(document).ready(function () {
-    $('.slider').slick({
-        arrows: false,
-        dots: true,
-        appendDots: '.slider-dots',
-        dotsClass: 'dots'
-    })
-})
+  $('.slider').slick({
+    arrows: false,
+    dots: true,
+    appendDots: '.slider-dots',
+    dotsClass: 'dots',
+    autoplay: true,
+    autoplaySpeed: 1500,
+    speed: 3000,
+    pauseOnHover: false,
+    pauseOnFocus: false
+  });
+});
+
+function scrollToTop() {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+}
 
 let hamberger = document.querySelector('.hamberger');
 let times = document.querySelector('.times');

@@ -12,9 +12,13 @@
     --light: #f2f2f2;
     --secondary: #070606;
 }
+html {
+      scroll-behavior: smooth;
+    }
 
 body {
     font-family: 'Poppins', sans-serif;
+    overflow-x: hidden;
 }
 
 html {
@@ -156,13 +160,13 @@ header nav h1 span {
     /* border-radius: 48% 62% 36% 44% / 44% 54% 46% 56%; */
     border-radius: 32%;
     box-shadow: 0 0 31px rgba(0, 210, 211, 0.6);
-    background: var(--primary) ;
+    background: var(--primary);
     /* background: linear-gradient(to right, */
-            /* rgba(255, 0, 0, 0.5) 100px, */
-            /* 50% ओपेसिटी वाला लाल */
-            /* rgba(0, 0, 255, 1) 100px */
-            /* 100% ओपेसिटी वाला नीला */
-        /* ); */
+    /* rgba(255, 0, 0, 0.5) 100px, */
+    /* 50% ओपेसिटी वाला लाल */
+    /* rgba(0, 0, 255, 1) 100px */
+    /* 100% ओपेसिटी वाला नीला */
+    /* ); */
 
     animation: waveRotate 10s ease-in-out infinite alternate;
     z-index: 1;
@@ -249,16 +253,20 @@ header nav h1 span {
     font-size: 3.7rem;
     font-weight: 100;
     line-height: 1.2;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
+    /* color: var(--secondary) */
+    text-shadow: 2px 2px 4px rgba(35, 34, 34, 1)
 }
 
 .hero .right h1 span {
     color: var(--primary);
+    text-shadow: 2px 2px 4px rgba(35, 34, 34, 1)
 }
 
 .hero .right p {
     line-height: 1.9rem;
     margin-bottom: 4rem;
+    text-shadow: 2px 2px 4px rgba(35, 34, 34, 1)
 }
 
 /* .wave-container::after {
@@ -281,14 +289,50 @@ section {
     padding: 9rem 0;
 }
 
+.about-me-img {
+    /* display: block; */
+    /* width: 280px; */
+    border-radius: 12px;
+    border: 8px ridge rgba(0, 0, 0, 0.7);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+}
+
 section.about .about-me-img {
     height: 450px;
     margin-right: 4rem;
     margin-left: 4rem;
-    border-radius: 10px;
-    border: 8px ridge rgba(0, 0, 0, 0.7);
-
 }
+
+.image-wrapper {
+    animation: floatUpDown 4s ease-in-out infinite;
+}
+
+.about-me-img {
+    /* display: block; */
+    /* width: 280px; */
+    border-radius: 12px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes floatUpDown {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+@media (max-width: 400px) {
+    .floating-img {
+        width: 85vw;
+    }
+}
+
+/* ------------------------------------ */
 
 section.about h1 {
     margin-bottom: 1rem;
@@ -316,28 +360,29 @@ section.about p {
 
 /* Container for Top Social Links */
 .top-social {
-  display: flex;
-  align-items: center;
-  gap: 12px; /* Top section ke hisab se compact spacing */
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    /* Top section ke hisab se compact spacing */
 }
 
 /* Base Icon Button Styling */
 .top-social .icon-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: var(--dark);
-  border-radius: 50%;
-  text-decoration: none;
-  font-size: 23px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: var(--dark);
+    border-radius: 50%;
+    text-decoration: none;
+    font-size: 23px;
 }
 
 /* Subtle Zoom Hover Effect */
 .top-social .icon-btn:hover {
-  transform: scale(1);
-  color: var(--primary);
+    transform: scale(1);
+    color: var(--primary);
 }
 
 
@@ -462,9 +507,12 @@ section.freelancer p {
     text-align: center;
 }
 
+
+
 .reviews .slider .slide img {
     /* width: 34.5rem; */
     width: 43rem;
+    height: 30rem;
     /* height: 450px; */
     /* object-fit: cover; */
     border: 1px solid var(--dark);
@@ -480,7 +528,7 @@ section.freelancer p {
 .slide-2 {
     width: 43rem;
     background: var(--primary);
-    padding: 0.5rem 43.5rem .5rem 0.5rem;
+    padding: 0.2rem 43.3rem .3rem 0.3rem;
     /* padding-bottom: 3px; */
     border-radius: 5px;
     box-shadow: 15px 15px var(--ternary);
@@ -488,7 +536,7 @@ section.freelancer p {
 }
 
 .slide-2+p {
-    padding-top: 2rem;
+    padding-top: 1.5rem;
 }
 
 .reviews .slider .slide p {
@@ -508,7 +556,7 @@ section.freelancer p {
 }
 
 .reviews .slider-dots {
-    margin-top: -4rem;
+    /* margin-top: 0rem; */
 }
 
 .reviews .slider-dots button {
@@ -529,6 +577,24 @@ section.freelancer p {
     background: var(--primary);
     width: 20px;
     height: 6px;
+}
+
+/* //Slieder 2 */
+
+.slider-box {
+  width: 500px;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.slider-track {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+}
+
+.slider-track img {
+  width: 100%;
+  flex-shrink: 0;
 }
 
 section.work {
@@ -796,6 +862,32 @@ blink {
         opacity: 0;
     }
 }
+
+.fixed-up-btn {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      width: 48px;
+      height: 48px;
+      background-color: var(--primary);
+      color: #000;
+      text-decoration: none;
+      font-size: 34px;
+      font-weight: bold;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 10px 25px rgba(35, 197, 226, 0.7);
+      z-index: 99999;
+      transition: transform 0.02s ease, background-color 0.000001s ease;
+    }
+    .fixed-up-btn:hover {
+      background-color: var(--dark);
+      color: var(--primary);
+      transform: translateY(-3px);
+      /* border: 3px solid var(--primary);  */
+    }
 
 .site-main-wrapper {
     position: relative;
@@ -1149,7 +1241,7 @@ blink {
     .hero .left img {
         width: 290px;
         border-radius: 20px;
-        padding-top: 1rem;
+        /* padding-top: 1rem; */
     }
 
     .wave-container {
@@ -1164,10 +1256,11 @@ blink {
         position: absolute;
         z-index: 1;
         right: 2%;
-        top: 5.8%;
+        /* top: 5.8%; */
         left: 2%;
         /* background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.7)); */
-        background: linear-gradient(rgba(0, 0, 0, 0) 41%, rgba(0, 0, 0, 9) 72%, rgba(0, 0, 0, 0) 65%);
+        background: linear-gradient(rgba(0, 0, 0, 0) 41%, rgba(0, 0, 0, 9) 92%, rgba(0, 0, 0, 0) 65%);
+        /* background: linear-gradient (rgba(0, 0, 0, 0) 41%, rgba(0, 0, 0, 9) 93%, rgba(0, 0, 0, 0) 65%) */
 
     }
 

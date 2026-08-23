@@ -103,7 +103,8 @@ Verson: V1.00
                         <h6>Adarsh Kumar</h6>
                         <h1>I'm a Creative </br><span id="typewriter"></span><span class="cursor">|</span></h1>
                         <p align="justify">Web design and development knowledge at the highest level, producing quality
-                            results. knowledge of Full Stack Web Developer, such as skills Core Java, C, JS, ReactJS,
+                            results. knowledge of Full Stack Web Developer, such as skills Java, Spring Boot, C, JS,
+                            ReactJS,
                             and PHP, SQL. and I am exploring new technical concepts & utilize
                             the same in a productive manner.</p>
                         <div>
@@ -115,8 +116,8 @@ Verson: V1.00
         </header>
         <section id="about" class="about">
             <div class="container flex items-center about-inner-wrap">
-                <div class="flex-1 blur-border">
-                    <img class="about-me-img creative" src="img/man2.webp" alt="">
+                <div class="flex-1 blur-border image-wrapper">
+                    <img class="about-me-img" src="img/man2.webp" alt="">
                 </div>
                 <div class="flex-1">
                     <h1>About<span> Me</span></h1>
@@ -241,7 +242,6 @@ Verson: V1.00
                         <div class="slide-2">
                             <img src="./img/sql1.webp" alt="">
                         </div>
-                        </object>
                         <p>This is certificate, I have successfully done in Structure Quary language (Basic) at
                             Hackerank .</p>
                         <span> - Patel, Company ADI Industries! </span>
@@ -258,7 +258,6 @@ Verson: V1.00
                         <div class="slide-2">
                             <img src="./img/Adarsh Kumar - API Testing .jpg" alt="">
                         </div>
-                        </object>
                         <p>This is certificate, I have successfully done in Learn API Testing at Devlabs Alliance.</p>
                         <span> - Patel, Company ADI Industries! </span>
                     </div>
@@ -452,7 +451,11 @@ Verson: V1.00
             <div class="copyright">
                 Copyrights 2026 © <blink><span>ADARSH DEVELOPERS INDUSTRIES </span></blink>All Right Reserved.
             </div>
+            <!-- <a href="#home" class="fixed-up-btn" title="Go to Top">&#8593;</a> -->
+            <button class="fixed-up-btn" onclick="scrollToTop()" title="Go to Top">&#8593;</button>
         </footer>
+
+        
 
     </div>
 
@@ -466,6 +469,22 @@ Verson: V1.00
     <script src="./app.js"></script>
     <script src="./email.js"></script>
     <script src="./contol.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+
+    <script>
+        const image = document.querySelector(".about-me-img");
+
+        if (image && typeof VanillaTilt !== "undefined") {
+            VanillaTilt.init(image, {
+                max: 35,
+                speed: 400,
+                glare: true,
+                "max-glare": 0.2
+            });
+        }
+    </script>
+
 
 </body>
 
